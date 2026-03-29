@@ -1,0 +1,875 @@
+import { Level, CipherType, Country } from './types';
+import { encrypt } from './ciphers';
+
+export const COUNTRIES: Country[] = [
+  { 
+    id: 'north',
+    name: 'Aethelgard',
+    description: 'The frozen northern kingdom, where ancient traditions meet cold efficiency.',
+    x: 518, y: 340,
+    color: '#d1e8e2',
+    path: "M374,113 L375,98 L386,99 L390,88 L397,86 L408,77 L422,77 L438,75 L448,65 L458,75 L470,73 L478,77 L500,69 L538,190 L630,268 L716,290 L715,307 L761,328 L750,377 L743,405 L755,439 L732,445 L704,462 L691,455 L657,463 L555,459 L538,460 L511,508 L489,525 L466,524 L448,552 L418,539 L414,616 L308,598 L309,548 L351,491 L319,464 L286,346 L276,284 L317,230 L326,189 L364,179 Z",
+    population: '12.4M',
+    capital: 'Frosthelm',
+    threatLevel: 'Medium',
+    encryptionStandard: 'RSA-4096'
+  },
+
+  { 
+    id: 'forest',
+    name: 'Sylvaris',
+    description: 'A lush, bioluminescent forest nation where nature and technology intertwine.',
+    x: 184, y: 340,
+    color: '#7d8c6a',
+    path: "M1,233 L12,233 L19,229 L27,230 L30,220 L40,220 L43,214 L53,220 L60,216 L72,229 L81,226 L107,224 L116,235 L127,234 L137,230 L144,221 L145,209 L152,207 L153,196 L150,189 L159,185 L161,173 L168,159 L179,155 L187,152 L194,156 L223,148 L233,157 L239,155 L246,147 L253,157 L264,157 L273,159 L282,148 L295,148 L303,152 L323,147 L334,142 L349,133 L370,135 L366,180 L327,192 L318,229 L278,286 L288,346 L325,464 L354,491 L311,547 L279,540 L251,554 L114,477 L24,475 L20,517 L2,517 Z",
+    population: '8.9M',
+    capital: 'Eldertree',
+    threatLevel: 'Low',
+    encryptionStandard: 'Organic Lattice'
+  },
+
+  { 
+    id: 'volcano',
+    name: 'Volcania',
+    description: 'A high-energy realm powered by geothermal vents and molten rivers.',
+    x: 680, y: 180,
+    color: '#a64d4d',
+    path: "M500,69 L516,74 L528,69 L537,63 L545,69 L554,69 L565,61 L582,71 L593,69 L606,73 L613,81 L653,87 L670,89 L679,98 L686,98 L689,108 L699,111 L714,123 L720,142 L732,138 L741,141 L754,137 L768,141 L780,140 L785,148 L796,143 L805,149 L818,150 L839,143 L844,132 L863,127 L848,163 L841,204 L836,247 L715,290 L628,267 L538,194 Z",
+    population: '15.2M',
+    capital: 'Magma Core',
+    threatLevel: 'High',
+    encryptionStandard: 'Thermal Pulse'
+  },
+
+  { 
+    id: 'coast',
+    name: 'Vesperia',
+    description: 'A maritime nation with a complex network of trade and naval signals.',
+    x: 216, y: 640,
+    color: '#5b7c99',
+    path: "M2,650 L9,641 L18,642 L25,656 L37,656 L60,659 L71,654 L81,657 L86,650 L96,649 L102,642 L110,647 L122,643 L131,636 L131,626 L144,628 L152,629 L160,634 L160,650 L169,647 L176,656 L178,661 L199,666 L204,678 L222,679 L230,684 L244,683 L252,679 L262,684 L280,686 L293,679 L305,677 L311,688 L324,689 L332,698 L341,707 L355,707 L361,719 L373,721 L388,732 L401,743 L411,748 L419,753 L437,751 L437,705 L411,613 L308,595 L310,544 L281,540 L251,550 L116,474 L23,471 L18,514 L0,514 Z",
+    population: '28.7M',
+    capital: 'Port Azure',
+    threatLevel: 'Low',
+    encryptionStandard: 'AES-256-GCM'
+  },
+
+  { 
+    id: 'industrial',
+    name: 'Ironhold',
+    description: 'A massive factory-state where steam and steel dominate the landscape.',
+    x: 562, y: 599,
+    color: '#8c6b5a',
+    path: "M435,751 L437,699 L411,615 L419,538 L446,547 L465,521 L491,520 L513,505 L539,456 L554,456 L657,462 L691,456 L691,476 L665,503 L667,534 L655,557 L674,583 L682,621 L701,640 L689,674 L730,682 L746,703 L749,748 L738,739 L726,749 L712,736 L699,740 L683,731 L651,719 L647,736 L628,735 L611,754 L601,761 L590,752 L583,762 L564,754 L548,765 L532,764 L526,773 L508,761 L497,765 L486,768 L479,770 L451,758 Z",
+    population: '32.4M',
+    capital: 'Steamhaven',
+    threatLevel: 'High',
+    encryptionStandard: 'Mechanical Shift'
+  },
+
+  { 
+    id: 'mountain',
+    name: 'Rivenia',
+    description: 'A rugged industrial power built into the heart of the Great Divide.',
+    x: 799, y: 599,
+    color: '#7a6b8a',
+    path: "M735,444 L754,438 L762,455 L799,465 L842,441 L854,446 L862,466 L855,479 L882,509 L868,546 L918,589 L928,630 L883,701 L863,697 L856,703 L853,712 L840,713 L830,718 L824,726 L816,727 L810,736 L799,740 L788,733 L777,733 L765,733 L763,740 L755,751 L747,742 L746,701 L729,685 L688,672 L700,640 L681,620 L681,620 L672,582 L655,554 L665,532 L664,501 L687,477 L691,456 L705,460 Z",
+    population: '18.1M',
+    capital: 'Ironforge',
+    threatLevel: 'High',
+    encryptionStandard: 'Twofish'
+  },
+
+  { 
+    id: 'desert',
+    name: 'Zandoria',
+    description: 'A vast desert empire known for its mathematical prowess and shifting sands.',
+    x: 961, y: 541,
+    color: '#c2a370',
+    path: "M856,450 L872,424 L979,378 L999,352 L1033,353 L1026,327 L1078,305 L1079,671 L1074,680 L1063,688 L1053,690 L1051,702 L1045,706 L1035,713 L1024,718 L1015,720 L1003,718 L997,719 L992,723 L980,723 L968,724 L965,730 L959,732 L951,725 L942,728 L931,728 L925,722 L914,715 L906,703 L881,697 L926,629 L915,588 L867,546 L881,508 L854,480 L861,466 Z",
+    population: '45.2M',
+    capital: 'Al-Kharid',
+    threatLevel: 'High',
+    encryptionStandard: 'Elliptic Curve'
+  },
+
+  { 
+    id: 'ocean',
+    name: 'Oceana',
+    description: 'A vast eastern superstate controlling global trade and advanced systems.',
+    x: 896, y: 238,
+    color: '#4a5b8c',
+    path: "M862,131 L866,114 L877,123 L891,114 L899,103 L906,109 L917,104 L927,104 L936,104 L939,113 L950,108 L954,98 L970,104 L982,107 L990,98 L998,99 L1008,95 L1015,88 L1019,94 L1026,87 L1034,81 L1030,69 L1078,20 L1078,305 L1028,329 L1035,353 L999,354 L979,381 L873,426 L858,448 L841,444 L800,468 L764,455 L754,437 L741,404 L748,375 L758,330 L713,309 L715,288 L832,246 L842,201 L848,161 Z",
+    population: '52.1M',
+    capital: 'Neo-Prime',
+    threatLevel: 'Critical',
+    encryptionStandard: 'Quantum-Resistant'
+  },
+
+  { 
+    id: 'island',
+    name: 'Isle of Shadows',
+    description: 'A mysterious island shrouded in mist, known for its ancient polybius grids and hidden messages.',
+    x: 120, y: 1050,
+    color: '#4d7a7a',
+    path: "M40,1000 L160,1000 L200,1100 L140,1250 L60,1250 L20,1100 Z",
+    population: '1.2M',
+    capital: 'Mist Haven',
+    threatLevel: 'Medium',
+    encryptionStandard: 'Obsidian Grid'
+  },
+
+  { 
+    id: 'tech',
+    name: 'Technopolis',
+    description: 'A futuristic city-state where the most advanced encryption machines are forged and tested.',
+    x: 940, y: 1050,
+    color: '#4d4d7a',
+    path: "M820,1000 L1040,1000 L1080,1100 L1020,1250 L860,1250 L800,1100 Z",
+    population: '5.8M',
+    capital: 'Silicon Core',
+    threatLevel: 'High',
+    encryptionStandard: 'Enigma-X'
+  }
+];
+
+export const INTRO_STORY = [
+  {
+    title: "The Silence of Aethelgard",
+    text: "Our once-peaceful world is fracturing. Communication lines between the ten nations have been severed, and a mysterious silence has fallen over Aethelgard.",
+    image: "https://picsum.photos/seed/cipher1/800/600?blur=2"
+  },
+  {
+    title: "The Shadow Protocol",
+    text: "Intercepted signals suggest a coordinated effort to destabilize the global alliance. The messages are encrypted with protocols we haven't seen in centuries.",
+    image: "https://picsum.photos/seed/cipher2/800/600?blur=2"
+  },
+  {
+    title: "The Last Cryptographer",
+    text: "You are the last of the Great Cryptographers. Your mission is to travel across the world, decrypt the intercepted messages, and uncover the truth behind the Shadow Protocol.",
+    image: "https://picsum.photos/seed/cipher3/800/600?blur=2"
+  },
+  {
+    title: "The World Awaits",
+    text: "Each nation holds a piece of the puzzle. From the frozen peaks of Aethelgard to the floating cities of Oceana, follow the trail of ciphers wherever they lead.",
+    image: "https://picsum.photos/seed/cipher4/800/600?blur=2"
+  }
+];
+
+export interface CipherInfo {
+  type: CipherType;
+  name: string;
+  description: string;
+  difficulty: 'Easy' | 'Medium' | 'Hard';
+  howTo: string;
+}
+
+export const CIPHER_INFOS: CipherInfo[] = [
+  {
+    type: 'atbash',
+    name: 'Atbash Cipher',
+    description: 'A monoalphabetic substitution cipher formed by taking the alphabet and mapping it to its reverse.',
+    difficulty: 'Easy',
+    howTo: `The Atbash Cipher is a very simple substitution cipher. It works by reversing the alphabet.
+
+A maps to Z
+B maps to Y
+C maps to X
+...
+M maps to N
+N maps to M
+...
+Z maps to A
+
+It is its own inverse, meaning the same process is used for both encryption and decryption. Just find the letter's opposite in the alphabet!`
+  },
+  {
+    type: 'caesar',
+    name: 'Caesar Cipher',
+    description: 'A simple substitution cipher that shifts letters by a fixed number of positions.',
+    difficulty: 'Easy',
+    howTo: `The Caesar Cipher works by shifting each letter in the plaintext by a fixed number of positions down the alphabet. 
+
+For example, with a shift of 3:
+A becomes D
+B becomes E
+C becomes F
+... and so on.
+
+To decrypt, simply shift the letters back by the same amount. If you reach the end of the alphabet (Z), it wraps around back to A.`
+  },
+  {
+    type: 'polybius',
+    name: 'Polybius Square',
+    description: 'A substitution cipher that represents each letter as a pair of coordinates on a 5x5 grid.',
+    difficulty: 'Medium',
+    howTo: `The Polybius Square uses a 5x5 grid containing the alphabet (usually combining I and J).
+
+    1 2 3 4 5
+  1 A B C D E
+  2 F G H I K
+  3 L M N O P
+  4 Q R S T U
+  5 V W X Y Z
+
+Each letter is replaced by its (Row, Column) coordinates.
+H = Row 2, Col 3 = 23
+E = Row 1, Col 5 = 15
+L = Row 3, Col 1 = 31
+L = Row 3, Col 1 = 31
+O = Row 3, Col 4 = 34
+
+HELLO = 2315313134`
+  },
+  {
+    type: 'railfence',
+    name: 'Rail Fence Cipher',
+    description: 'A transposition cipher that writes the message in a zigzag pattern across multiple "rails".',
+    difficulty: 'Hard',
+    howTo: `The Rail Fence Cipher (or Zigzag Cipher) works by writing the message in a zigzag pattern on imaginary rails.
+
+Example with 3 rails:
+H . . . O . . . L .
+. E . L . W . R . D
+. . L . . . O . . .
+
+Read off each rail horizontally:
+Rail 1: HOL
+Rail 2: ELWRD
+Rail 3: LO
+Ciphertext: HOLELWRDLO
+
+To decrypt, you must recreate the zigzag pattern and fill in the letters rail by rail.`
+  },
+  {
+    type: 'affine',
+    name: 'Affine Cipher',
+    description: 'A monoalphabetic substitution cipher where each letter is mapped to its numeric equivalent, encrypted using a linear function.',
+    difficulty: 'Medium',
+    howTo: `The Affine Cipher uses a mathematical formula: E(x) = (ax + b) mod 26.
+
+1. Convert each letter to a number (A=0, B=1, ..., Z=25).
+2. Apply the formula: (a * x + b) mod 26.
+3. Convert the result back to a letter.
+
+The value 'a' must be coprime to 26 (e.g., 1, 3, 5, 7, 9, 11, 15, 17, 19, 21, 23, 25).`
+  },
+  {
+    type: 'beaufort',
+    name: 'Beaufort Cipher',
+    description: 'A polyalphabetic substitution cipher similar to Vigenere, but using a different encryption formula.',
+    difficulty: 'Hard',
+    howTo: `The Beaufort Cipher is similar to Vigenere but uses the formula: C = (K - P) mod 26.
+
+1. Write the keyword repeatedly above the plaintext.
+2. For each letter, subtract the plaintext value from the keyword value.
+3. If the result is negative, add 26.
+
+Example: Key 'B' (1), Plaintext 'A' (0) -> (1 - 0) = 1 (B).`
+  },
+  {
+    type: 'columnar',
+    name: 'Columnar Transposition',
+    description: 'A transposition cipher where the message is written in rows and then read off in columns determined by a keyword.',
+    difficulty: 'Hard',
+    howTo: `Columnar Transposition rearranges the letters of a message.
+
+1. Write the message in rows under a keyword.
+2. Number the letters of the keyword alphabetically.
+3. Read off the columns in the order of the numbers.
+
+Example: Key 'DOG' (Order: D=1, G=2, O=3)
+D O G
+1 3 2
+H E L
+L O W
+Read Col 1 (HL), Col 2 (LW), Col 3 (EO) -> HLLWEO`
+  },
+  {
+    type: 'hill',
+    name: 'Hill Cipher',
+    description: 'A polygraphic substitution cipher based on linear algebra, using a matrix to encrypt blocks of letters.',
+    difficulty: 'Hard',
+    howTo: `The Hill Cipher encrypts blocks of letters using matrix multiplication.
+
+For a 2x2 matrix:
+1. Convert a pair of letters to a vector (P1, P2).
+2. Multiply the vector by the key matrix:
+   C1 = (M11*P1 + M12*P2) mod 26
+   C2 = (M21*P1 + M22*P2) mod 26
+3. Convert (C1, C2) back to letters.`
+  },
+  {
+    type: 'enigma',
+    name: 'Enigma Machine',
+    description: 'A legendary electro-mechanical rotor cipher machine used for military communication.',
+    difficulty: 'Hard',
+    howTo: `The Enigma Machine uses a complex system of rotors, a reflector, and a plugboard.
+
+1. Plugboard: Swaps pairs of letters before and after the rotor stage.
+2. Rotors: Three rotors (I-V) rotate with each keypress, creating a dynamic substitution.
+3. Reflector: Sends the signal back through the rotors in reverse.
+
+Decryption is identical to encryption if the machine configuration (rotor order, starting positions, and plugboard) is exactly the same.`
+  },
+  {
+    type: 'vigenere',
+    name: 'Vigenere Cipher',
+    description: 'A method of encrypting alphabetic text by using a series of interwoven Caesar ciphers.',
+    difficulty: 'Hard',
+    howTo: `The Vigenère Cipher uses a keyword to determine the shift for each letter. 
+
+1. Write the keyword repeatedly above the plaintext.
+2. For each letter, find the shift value of the corresponding keyword letter (A=0, B=1, C=2, etc.).
+3. Shift the plaintext letter by that value (like a Caesar cipher).
+
+Example:
+Plaintext: ATTACK
+Keyword:  LEMONL
+Shift:    L(11), E(4), M(12), O(14), N(13), L(11)
+
+To decrypt, subtract the shift value instead of adding it.`
+  },
+  {
+    type: 'monoalphabetic',
+    name: 'Monoalphabetic Cipher',
+    description: 'A substitution cipher where each letter of the plaintext is replaced by another letter from a fixed, random alphabet.',
+    difficulty: 'Hard',
+    howTo: `In a Monoalphabetic Substitution cipher, the entire alphabet is shuffled to create a 'key'.
+
+Standard: ABCDEFGHIJKLMNOPQRSTUVWXYZ
+Key:      QWERTYUIOPASDFGHJKLZXCVBNM
+
+Every 'A' becomes 'Q', every 'B' becomes 'W', and so on. 
+
+To crack it, use frequency analysis: in English, 'E' is the most common letter, followed by 'T', 'A', 'O', etc. Look for common patterns and short words like 'THE' or 'AND'.`
+  },
+  {
+    type: 'playfair',
+    name: 'Playfair Cipher',
+    description: 'A digram substitution cipher that encrypts pairs of letters using a 5x5 grid.',
+    difficulty: 'Hard',
+    howTo: `The Playfair Cipher uses a 5x5 grid based on a keyword.
+
+1. Fill the grid with the keyword (no duplicate letters), then the rest of the alphabet (combining I/J).
+2. Split the message into pairs (e.g., HE LL O). If a pair has the same letter, add an 'X'.
+3. For each pair:
+   - Same row: Shift right.
+   - Same column: Shift down.
+   - Rectangle: Swap corners.
+
+To decrypt, reverse the shifts!`
+  }
+];
+
+export const getXpReward = (level: Level): number => {
+  const length = level.plaintext.length;
+  let baseXP = level.difficulty === 'Easy' ? 100 : level.difficulty === 'Medium' ? 250 : 500;
+  
+  // Dynamic XP based on length and cipher nature
+  if (level.cipherType === 'polybius' || level.cipherType === 'caesar' || level.cipherType === 'atbash') {
+    // Formulaic: Longer is harder/takes more time
+    return baseXP + Math.floor(length * 2);
+  } else if (level.cipherType === 'monoalphabetic' || level.cipherType === 'playfair' || level.cipherType === 'vigenere') {
+    // Analytical: Shorter is harder to crack (less data), but we now prefer longer messages for crackability
+    // We still give a small bonus for shorter ones if they appear, but base it on a higher threshold
+    const lengthBonus = Math.max(0, (150 - length) * 2);
+    return baseXP + lengthBonus + Math.floor(length / 2); // Also reward length slightly as it still takes time to type
+  }
+  
+  return baseXP;
+};
+
+export const LEVELS: Level[] = ([
+  // CAESAR (c1-c20)
+  { id: 'c1', countryId: 'north', name: "Caesar Tutorial", cipherType: 'caesar', plaintext: "HELLO WORLD", ciphertext: encrypt("HELLO WORLD", 'caesar', { shift: 3 }), hint: "A simple shift of 3 positions.", difficulty: 'Easy', params: { shift: 3 }, xpReward: 100, isTutorial: true },
+  { id: 'c2', countryId: 'north', name: "The Roman Decree", cipherType: 'caesar', plaintext: "ALL ROADS LEAD TO ROME", ciphertext: encrypt("ALL ROADS LEAD TO ROME", 'caesar', { shift: 5 }), hint: "The shift is 5.", difficulty: 'Easy', params: { shift: 5 }, xpReward: 100 },
+  { id: 'c3', countryId: 'north', name: "Secret Correspondence", cipherType: 'caesar', plaintext: "THE GHOST WALKS AT MIDNIGHT", ciphertext: encrypt("THE GHOST WALKS AT MIDNIGHT", 'caesar', { shift: 10 }), hint: "A shift of 10 positions.", difficulty: 'Medium', params: { shift: 10 }, xpReward: 250 },
+  { id: 'c4', countryId: 'north', name: "Hidden Garden", cipherType: 'caesar', plaintext: "MEET ME IN THE ROSE GARDEN", ciphertext: encrypt("MEET ME IN THE ROSE GARDEN", 'caesar', { shift: 7 }), hint: "Shift is 7.", difficulty: 'Easy', params: { shift: 7 }, xpReward: 100 },
+  { id: 'c5', countryId: 'north', name: "Midnight Run", cipherType: 'caesar', plaintext: "THE TRAIN LEAVES AT TWELVE", ciphertext: encrypt("THE TRAIN LEAVES AT TWELVE", 'caesar', { shift: 12 }), hint: "Shift is 12.", difficulty: 'Medium', params: { shift: 12 }, xpReward: 250 },
+  { id: 'c6', countryId: 'north', name: "Desert Storm", cipherType: 'caesar', plaintext: "WATER IS LOCATED IN THE NORTH", ciphertext: encrypt("WATER IS LOCATED IN THE NORTH", 'caesar', { shift: 4 }), hint: "Shift is 4.", difficulty: 'Easy', params: { shift: 4 } },
+  { id: 'c7', countryId: 'north', name: "Mountain Peak", cipherType: 'caesar', plaintext: "CLIMB THE HIGHEST MOUNTAIN", ciphertext: encrypt("CLIMB THE HIGHEST MOUNTAIN", 'caesar', { shift: 15 }), hint: "Shift is 15.", difficulty: 'Medium', params: { shift: 15 } },
+  { id: 'c8', countryId: 'north', name: "Ocean Deep", cipherType: 'caesar', plaintext: "THE TREASURE IS UNDER THE SEA", ciphertext: encrypt("THE TREASURE IS UNDER THE SEA", 'caesar', { shift: 8 }), hint: "Shift is 8.", difficulty: 'Easy', params: { shift: 8 } },
+  { id: 'c9', countryId: 'north', name: "Forest Path", cipherType: 'caesar', plaintext: "FOLLOW THE PATH THROUGH THE WOODS", ciphertext: encrypt("FOLLOW THE PATH THROUGH THE WOODS", 'caesar', { shift: 20 }), hint: "Shift is 20.", difficulty: 'Hard', params: { shift: 20 } },
+  { id: 'c10', countryId: 'north', name: "Sky High", cipherType: 'caesar', plaintext: "THE BIRDS FLY SOUTH FOR WINTER", ciphertext: encrypt("THE BIRDS FLY SOUTH FOR WINTER", 'caesar', { shift: 1 }), hint: "Shift is 1.", difficulty: 'Easy', params: { shift: 1 } },
+  { id: 'c11', countryId: 'north', name: "Ancient Ruins", cipherType: 'caesar', plaintext: "EXPLORE THE TEMPLE OF DOOM", ciphertext: encrypt("EXPLORE THE TEMPLE OF DOOM", 'caesar', { shift: 13 }), hint: "Shift is 13.", difficulty: 'Medium', params: { shift: 13 } },
+  { id: 'c12', countryId: 'north', name: "City Lights", cipherType: 'caesar', plaintext: "THE CITY NEVER SLEEPS AT NIGHT", ciphertext: encrypt("THE CITY NEVER SLEEPS AT NIGHT", 'caesar', { shift: 6 }), hint: "Shift is 6.", difficulty: 'Easy', params: { shift: 6 } },
+  { id: 'c13', countryId: 'north', name: "Winter Chill", cipherType: 'caesar', plaintext: "SNOW IS FALLING ON THE GROUND", ciphertext: encrypt("SNOW IS FALLING ON THE GROUND", 'caesar', { shift: 18 }), hint: "Shift is 18.", difficulty: 'Hard', params: { shift: 18 } },
+  { id: 'c14', countryId: 'north', name: "Summer Heat", cipherType: 'caesar', plaintext: "THE SUN IS SHINING BRIGHTLY", ciphertext: encrypt("THE SUN IS SHINING BRIGHTLY", 'caesar', { shift: 2 }), hint: "Shift is 2.", difficulty: 'Easy', params: { shift: 2 } },
+  { id: 'c15', countryId: 'north', name: "Spring Bloom", cipherType: 'caesar', plaintext: "FLOWERS ARE GROWING IN THE FIELD", ciphertext: encrypt("FLOWERS ARE GROWING IN THE FIELD", 'caesar', { shift: 9 }), hint: "Shift is 9.", difficulty: 'Medium', params: { shift: 9 } },
+  { id: 'c16', countryId: 'north', name: "Autumn Leaves", cipherType: 'caesar', plaintext: "LEAVES ARE TURNING RED AND GOLD", ciphertext: encrypt("LEAVES ARE TURNING RED AND GOLD", 'caesar', { shift: 11 }), hint: "Shift is 11.", difficulty: 'Medium', params: { shift: 11 } },
+  { id: 'c17', countryId: 'north', name: "Quiet Night", cipherType: 'caesar', plaintext: "THE MOON IS FULL AND BRIGHT", ciphertext: encrypt("THE MOON IS FULL AND BRIGHT", 'caesar', { shift: 14 }), hint: "Shift is 14.", difficulty: 'Medium', params: { shift: 14 } },
+  { id: 'c18', countryId: 'north', name: "Stormy Weather", cipherType: 'caesar', plaintext: "THUNDER AND LIGHTNING IN THE SKY", ciphertext: encrypt("THUNDER AND LIGHTNING IN THE SKY", 'caesar', { shift: 16 }), hint: "Shift is 16.", difficulty: 'Hard', params: { shift: 16 } },
+  { id: 'c19', countryId: 'north', name: "Golden Hour", cipherType: 'caesar', plaintext: "THE SKY IS ORANGE AND PINK", ciphertext: encrypt("THE SKY IS ORANGE AND PINK", 'caesar', { shift: 17 }), hint: "Shift is 17.", difficulty: 'Hard', params: { shift: 17 } },
+  { id: 'c20', countryId: 'north', name: "Final Shift", cipherType: 'caesar', plaintext: "YOU HAVE MASTERED THE CAESAR CIPHER", ciphertext: encrypt("YOU HAVE MASTERED THE CAESAR CIPHER", 'caesar', { shift: 25 }), hint: "Shift is 25.", difficulty: 'Hard', params: { shift: 25 } },
+
+  // ATBASH (a1-a20)
+  { id: 'a1', countryId: 'forest', name: "Atbash Tutorial", cipherType: 'atbash', plaintext: "ABC XYZ", ciphertext: encrypt("ABC XYZ", 'atbash'), hint: "A is Z, B is Y...", difficulty: 'Easy', isTutorial: true },
+  { id: 'a2', countryId: 'north', name: "Mirror Message", cipherType: 'atbash', plaintext: "THE QUICK BROWN FOX", ciphertext: encrypt("THE QUICK BROWN FOX", 'atbash'), hint: "Every letter is its opposite.", difficulty: 'Easy' },
+  { id: 'a3', countryId: 'north', name: "Reflected Reality", cipherType: 'atbash', plaintext: "BENEATH THE SURFACE LIES TRUTH", ciphertext: encrypt("BENEATH THE SURFACE LIES TRUTH", 'atbash'), hint: "Reverse the entire alphabet.", difficulty: 'Medium' },
+  { id: 'a4', countryId: 'north', name: "Silver Screen", cipherType: 'atbash', plaintext: "WATCH THE MOVIE AT THE CINEMA", ciphertext: encrypt("WATCH THE MOVIE AT THE CINEMA", 'atbash'), hint: "Opposite letters.", difficulty: 'Easy' },
+  { id: 'a5', countryId: 'north', name: "Dark Side", cipherType: 'atbash', plaintext: "DO NOT GO INTO THE DARKNESS", ciphertext: encrypt("DO NOT GO INTO THE DARKNESS", 'atbash'), hint: "A to Z, B to Y.", difficulty: 'Medium' },
+  { id: 'a6', countryId: 'north', name: "Bright Light", cipherType: 'atbash', plaintext: "THE LIGHT WILL GUIDE YOU HOME", ciphertext: encrypt("THE LIGHT WILL GUIDE YOU HOME", 'atbash'), hint: "Mirror the alphabet.", difficulty: 'Easy' },
+  { id: 'a7', countryId: 'north', name: "Silent Echo", cipherType: 'atbash', plaintext: "HEAR THE ECHO IN THE VALLEY", ciphertext: encrypt("HEAR THE ECHO IN THE VALLEY", 'atbash'), hint: "Alphabet flip.", difficulty: 'Medium' },
+  { id: 'a8', countryId: 'north', name: "Lost Soul", cipherType: 'atbash', plaintext: "FIND THE WAY BACK TO THE LIGHT", ciphertext: encrypt("FIND THE WAY BACK TO THE LIGHT", 'atbash'), hint: "Reverse mapping.", difficulty: 'Medium' },
+  { id: 'a9', countryId: 'north', name: "Broken Mirror", cipherType: 'atbash', plaintext: "THE MIRROR IS BROKEN IN PIECES", ciphertext: encrypt("THE MIRROR IS BROKEN IN PIECES", 'atbash'), hint: "Standard Atbash.", difficulty: 'Hard' },
+  { id: 'a10', countryId: 'north', name: "Hidden Truth", cipherType: 'atbash', plaintext: "THE TRUTH IS HIDDEN FROM VIEW", ciphertext: encrypt("THE TRUTH IS HIDDEN FROM VIEW", 'atbash'), hint: "Opposite alphabet.", difficulty: 'Medium' },
+  { id: 'a11', countryId: 'north', name: "Secret Path", cipherType: 'atbash', plaintext: "TAKE THE PATH TO THE SECRET ROOM", ciphertext: encrypt("TAKE THE PATH TO THE SECRET ROOM", 'atbash'), hint: "Alphabet reversal.", difficulty: 'Medium' },
+  { id: 'a12', countryId: 'north', name: "Ancient Scroll", cipherType: 'atbash', plaintext: "READ THE ANCIENT SCROLL CAREFULLY", ciphertext: encrypt("READ THE ANCIENT SCROLL CAREFULLY", 'atbash'), hint: "Atbash mapping.", difficulty: 'Hard' },
+  { id: 'a13', countryId: 'north', name: "Forgotten City", cipherType: 'atbash', plaintext: "THE CITY WAS FORGOTTEN BY TIME", ciphertext: encrypt("THE CITY WAS FORGOTTEN BY TIME", 'atbash'), hint: "Reverse letters.", difficulty: 'Medium' },
+  { id: 'a14', countryId: 'north', name: "Mystic River", cipherType: 'atbash', plaintext: "THE RIVER FLOWS TO THE OCEAN", ciphertext: encrypt("THE RIVER FLOWS TO THE OCEAN", 'atbash'), hint: "Opposite letters.", difficulty: 'Easy' },
+  { id: 'a15', countryId: 'north', name: "Magic Wand", cipherType: 'atbash', plaintext: "THE WAND HAS MAGIC POWERS", ciphertext: encrypt("THE WAND HAS MAGIC POWERS", 'atbash'), hint: "Standard Atbash.", difficulty: 'Medium' },
+  { id: 'a16', countryId: 'north', name: "Crystal Ball", cipherType: 'atbash', plaintext: "SEE THE FUTURE IN THE CRYSTAL", ciphertext: encrypt("SEE THE FUTURE IN THE CRYSTAL", 'atbash'), hint: "Alphabet flip.", difficulty: 'Medium' },
+  { id: 'a17', countryId: 'north', name: "Starry Sky", cipherType: 'atbash', plaintext: "THE STARS ARE SHINING IN THE SKY", ciphertext: encrypt("THE STARS ARE SHINING IN THE SKY", 'atbash'), hint: "Reverse alphabet.", difficulty: 'Hard' },
+  { id: 'a18', countryId: 'north', name: "Moonlit Night", cipherType: 'atbash', plaintext: "THE MOON IS SHINING ON THE LAKE", ciphertext: encrypt("THE MOON IS SHINING ON THE LAKE", 'atbash'), hint: "Atbash cipher.", difficulty: 'Medium' },
+  { id: 'a19', countryId: 'north', name: "Golden Sun", cipherType: 'atbash', plaintext: "THE SUN IS SETTING IN THE WEST", ciphertext: encrypt("THE SUN IS SETTING IN THE WEST", 'atbash'), hint: "Opposite letters.", difficulty: 'Hard' },
+  { id: 'a20', countryId: 'north', name: "Final Reflection", cipherType: 'atbash', plaintext: "YOU HAVE MASTERED THE ATBASH CIPHER", ciphertext: encrypt("YOU HAVE MASTERED THE ATBASH CIPHER", 'atbash'), hint: "Reverse the alphabet.", difficulty: 'Hard' },
+
+  // VIGENERE (v1-v20)
+  { id: 'v1', countryId: 'coast', name: "Vigenere Tutorial", cipherType: 'vigenere', plaintext: "THE VIGENERE CIPHER IS A METHOD OF ENCRYPTING ALPHABETIC TEXT BY USING A SERIES OF INTERWOVEN CAESAR CIPHERS BASED ON THE LETTERS OF A KEYWORD", ciphertext: encrypt("THE VIGENERE CIPHER IS A METHOD OF ENCRYPTING ALPHABETIC TEXT BY USING A SERIES OF INTERWOVEN CAESAR CIPHERS BASED ON THE LETTERS OF A KEYWORD", 'vigenere', { key: "KEY" }), hint: "The key is 'KEY'.", difficulty: 'Medium', params: { key: "KEY" }, isTutorial: true },
+  { id: 'v2', countryId: 'coast', name: "The Polyalphabetic Path", cipherType: 'vigenere', plaintext: "THE ENEMY IS APPROACHING FROM THE NORTHERN RIDGE AND WILL ARRIVE AT THE GATES BY DAWN PREPARE THE DEFENSES AND ALERT THE KING IMMEDIATELY", ciphertext: encrypt("THE ENEMY IS APPROACHING FROM THE NORTHERN RIDGE AND WILL ARRIVE AT THE GATES BY DAWN PREPARE THE DEFENSES AND ALERT THE KING IMMEDIATELY", 'vigenere', { key: "GUARD" }), hint: "The key is 'GUARD'.", difficulty: 'Medium', params: { key: "GUARD" } },
+  { id: 'v3', countryId: 'coast', name: "Master of Ciphers", cipherType: 'vigenere', plaintext: "ONLY THE BRAVE SHALL UNCOVER THE ANCIENT SECRETS HIDDEN WITHIN THESE WALLS FOR GENERATIONS THE TRUTH HAS BEEN VEILED BY THE SHADOWS OF TIME", ciphertext: encrypt("ONLY THE BRAVE SHALL UNCOVER THE ANCIENT SECRETS HIDDEN WITHIN THESE WALLS FOR GENERATIONS THE TRUTH HAS BEEN VEILED BY THE SHADOWS OF TIME", 'vigenere', { key: "LEGEND" }), hint: "The key is 'LEGEND'.", difficulty: 'Hard', params: { key: "LEGEND" } },
+  { id: 'v4', countryId: 'coast', name: "Code Breaker", cipherType: 'vigenere', plaintext: "THE ART OF CRYPTOGRAPHY IS NOT JUST ABOUT HIDING SECRETS BUT ABOUT THE CONSTANT BATTLE BETWEEN THE ENCODER AND THE DECODER WHO STRIVES TO UNVEIL THE TRUTH", ciphertext: encrypt("THE ART OF CRYPTOGRAPHY IS NOT JUST ABOUT HIDING SECRETS BUT ABOUT THE CONSTANT BATTLE BETWEEN THE ENCODER AND THE DECODER WHO STRIVES TO UNVEIL THE TRUTH", 'vigenere', { key: "CODE" }), hint: "The key is 'CODE'.", difficulty: 'Medium', params: { key: "CODE" } },
+  { id: 'v5', countryId: 'coast', name: "Hidden Treasure", cipherType: 'vigenere', plaintext: "LEGENDS SPEAK OF A LOST CITY BURIED DEEP BENEATH THE SANDS OF THE SAHARA WHERE THE STREETS ARE PAVED WITH GOLD AND THE WALLS ARE ADORNED WITH PRECIOUS GEMS", ciphertext: encrypt("LEGENDS SPEAK OF A LOST CITY BURIED DEEP BENEATH THE SANDS OF THE SAHARA WHERE THE STREETS ARE PAVED WITH GOLD AND THE WALLS ARE ADORNED WITH PRECIOUS GEMS", 'vigenere', { key: "GOLD" }), hint: "The key is 'GOLD'.", difficulty: 'Medium', params: { key: "GOLD" } },
+  { id: 'v6', countryId: 'coast', name: "Secret Agent", cipherType: 'vigenere', plaintext: "THE AGENT MUST REMAIN INVISIBLE AT ALL TIMES BLENDING INTO THE CROWD LIKE A SHADOW IN THE NIGHT WHILE COLLECTING VITAL INTELLIGENCE FOR THE MISSION", ciphertext: encrypt("THE AGENT MUST REMAIN INVISIBLE AT ALL TIMES BLENDING INTO THE CROWD LIKE A SHADOW IN THE NIGHT WHILE COLLECTING VITAL INTELLIGENCE FOR THE MISSION", 'vigenere', { key: "SPY" }), hint: "The key is 'SPY'.", difficulty: 'Medium', params: { key: "SPY" } },
+  { id: 'v7', countryId: 'coast', name: "Midnight Meeting", cipherType: 'vigenere', plaintext: "THE MEETING WILL TAKE PLACE AT THE ABANDONED WAREHOUSE BY THE DOCKS AT EXACTLY MIDNIGHT ENSURE THAT YOU ARE NOT FOLLOWED BY ANY HOSTILE OPERATIVES", ciphertext: encrypt("THE MEETING WILL TAKE PLACE AT THE ABANDONED WAREHOUSE BY THE DOCKS AT EXACTLY MIDNIGHT ENSURE THAT YOU ARE NOT FOLLOWED BY ANY HOSTILE OPERATIVES", 'vigenere', { key: "NIGHT" }), hint: "The key is 'NIGHT'.", difficulty: 'Hard', params: { key: "NIGHT" } },
+  { id: 'v8', countryId: 'coast', name: "Desert Oasis", cipherType: 'vigenere', plaintext: "AFTER DAYS OF WANDERING THROUGH THE SCORCHING HEAT OF THE DESERT THE TRAVELERS FINALLY SPOTTED A LUSH GREEN OASIS SHIMMERING ON THE HORIZON LIKE A MIRAGE", ciphertext: encrypt("AFTER DAYS OF WANDERING THROUGH THE SCORCHING HEAT OF THE DESERT THE TRAVELERS FINALLY SPOTTED A LUSH GREEN OASIS SHIMMERING ON THE HORIZON LIKE A MIRAGE", 'vigenere', { key: "WATER" }), hint: "The key is 'WATER'.", difficulty: 'Medium', params: { key: "WATER" } },
+  { id: 'v9', countryId: 'coast', name: "Mountain Pass", cipherType: 'vigenere', plaintext: "THE NARROW MOUNTAIN PASS IS THE ONLY WAY TO REACH THE HIDDEN VALLEY BUT IT IS GUARDED BY FIERCE WARRIORS WHO HAVE PROTECTED THEIR LAND FOR CENTURIES", ciphertext: encrypt("THE NARROW MOUNTAIN PASS IS THE ONLY WAY TO REACH THE HIDDEN VALLEY BUT IT IS GUARDED BY FIERCE WARRIORS WHO HAVE PROTECTED THEIR LAND FOR CENTURIES", 'vigenere', { key: "COLD" }), hint: "The key is 'COLD'.", difficulty: 'Medium', params: { key: "COLD" } },
+  { id: 'v10', countryId: 'coast', name: "Ocean Wave", cipherType: 'vigenere', plaintext: "THE MIGHTY WAVES OF THE ATLANTIC OCEAN CRASHED AGAINST THE RUGGED CLIFFS SENDING SPRAY HIGH INTO THE AIR AS THE STORM BREWED ON THE DISTANT HORIZON", ciphertext: encrypt("THE MIGHTY WAVES OF THE ATLANTIC OCEAN CRASHED AGAINST THE RUGGED CLIFFS SENDING SPRAY HIGH INTO THE AIR AS THE STORM BREWED ON THE DISTANT HORIZON", 'vigenere', { key: "SEA" }), hint: "The key is 'SEA'.", difficulty: 'Medium', params: { key: "SEA" } },
+  { id: 'v11', countryId: 'coast', name: "Forest Fire", cipherType: 'vigenere', plaintext: "A DEVASTATING FOREST FIRE RAGED THROUGH THE ANCIENT WOODLANDS DESTROYING EVERYTHING IN ITS PATH AS THE BRAVE FIREFIGHTERS BATTLED THE INFERNO", ciphertext: encrypt("A DEVASTATING FOREST FIRE RAGED THROUGH THE ANCIENT WOODLANDS DESTROYING EVERYTHING IN ITS PATH AS THE BRAVE FIREFIGHTERS BATTLED THE INFERNO", 'vigenere', { key: "BURN" }), hint: "The key is 'BURN'.", difficulty: 'Hard', params: { key: "BURN" } },
+  { id: 'v12', countryId: 'coast', name: "Sky Rocket", cipherType: 'vigenere', plaintext: "THE POWERFUL ROCKET ENGINES IGNITED WITH A DEAFENING ROAR SENDING THE SPACECRAFT HURTLING TOWARDS THE STARS AS THE WORLD WATCHED IN AWE AND WONDER", ciphertext: encrypt("THE POWERFUL ROCKET ENGINES IGNITED WITH A DEAFENING ROAR SENDING THE SPACECRAFT HURTLING TOWARDS THE STARS AS THE WORLD WATCHED IN AWE AND WONDER", 'vigenere', { key: "SPACE" }), hint: "The key is 'SPACE'.", difficulty: 'Medium', params: { key: "SPACE" } },
+  { id: 'v13', countryId: 'coast', name: "City Street", cipherType: 'vigenere', plaintext: "THE BUSTLING STREETS OF THE METROPOLIS WERE FILLED WITH THE SOUNDS OF TRAFFIC AND THE CHATTER OF THOUSANDS OF PEOPLE GOING ABOUT THEIR DAILY LIVES", ciphertext: encrypt("THE BUSTLING STREETS OF THE METROPOLIS WERE FILLED WITH THE SOUNDS OF TRAFFIC AND THE CHATTER OF THOUSANDS OF PEOPLE GOING ABOUT THEIR DAILY LIVES", 'vigenere', { key: "CITY" }), hint: "The key is 'CITY'.", difficulty: 'Medium', params: { key: "CITY" } },
+  { id: 'v14', countryId: 'coast', name: "Winter Storm", cipherType: 'vigenere', plaintext: "A FIERCE WINTER STORM BLANKETED THE COUNTRYSIDE IN A THICK LAYER OF SNOW MAKING TRAVEL IMPOSSIBLE AND FORCING EVERYONE TO SEEK SHELTER BY THE FIRE", ciphertext: encrypt("A FIERCE WINTER STORM BLANKETED THE COUNTRYSIDE IN A THICK LAYER OF SNOW MAKING TRAVEL IMPOSSIBLE AND FORCING EVERYONE TO SEEK SHELTER BY THE FIRE", 'vigenere', { key: "WIND" }), hint: "The key is 'WIND'.", difficulty: 'Hard', params: { key: "WIND" } },
+  { id: 'v15', countryId: 'coast', name: "Summer Breeze", cipherType: 'vigenere', plaintext: "A GENTLE SUMMER BREEZE WAFTED THROUGH THE OPEN WINDOW CARRYING THE SCENT OF BLOOMING FLOWERS AND THE SOUND OF BIRDS SINGING IN THE NEARBY TREES", ciphertext: encrypt("A GENTLE SUMMER BREEZE WAFTED THROUGH THE OPEN WINDOW CARRYING THE SCENT OF BLOOMING FLOWERS AND THE SOUND OF BIRDS SINGING IN THE NEARBY TREES", 'vigenere', { key: "COOL" }), hint: "The key is 'COOL'.", difficulty: 'Medium', params: { key: "COOL" } },
+  { id: 'v16', countryId: 'coast', name: "Spring Rain", cipherType: 'vigenere', plaintext: "THE SOFT SPRING RAIN FELL GENTLY ON THE PARCHED EARTH NOURISHING THE NEWLY PLANTED SEEDS AND BRINGING LIFE BACK TO THE GARDEN AFTER THE LONG WINTER", ciphertext: encrypt("THE SOFT SPRING RAIN FELL GENTLY ON THE PARCHED EARTH NOURISHING THE NEWLY PLANTED SEEDS AND BRINGING LIFE BACK TO THE GARDEN AFTER THE LONG WINTER", 'vigenere', { key: "RAIN" }), hint: "The key is 'RAIN'.", difficulty: 'Medium', params: { key: "RAIN" } },
+  { id: 'v17', countryId: 'coast', name: "Autumn Wind", cipherType: 'vigenere', plaintext: "THE CRISP AUTUMN WIND BLEW THE FALLEN LEAVES ACROSS THE PARK CREATING A COLORFUL CARPET OF RED ORANGE AND YELLOW BENEATH THE FEET OF THE PASSERSBY", ciphertext: encrypt("THE CRISP AUTUMN WIND BLEW THE FALLEN LEAVES ACROSS THE PARK CREATING A COLORFUL CARPET OF RED ORANGE AND YELLOW BENEATH THE FEET OF THE PASSERSBY", 'vigenere', { key: "FALL" }), hint: "The key is 'FALL'.", difficulty: 'Hard', params: { key: "FALL" } },
+  { id: 'v18', countryId: 'coast', name: "Quiet Room", cipherType: 'vigenere', plaintext: "THE LIBRARY WAS A HAVEN OF PEACE AND QUIET WHERE ONE COULD ESCAPE THE NOISE OF THE OUTSIDE WORLD AND GET LOST IN THE PAGES OF A GOOD BOOK", ciphertext: encrypt("THE LIBRARY WAS A HAVEN OF PEACE AND QUIET WHERE ONE COULD ESCAPE THE NOISE OF THE OUTSIDE WORLD AND GET LOST IN THE PAGES OF A GOOD BOOK", 'vigenere', { key: "SILENT" }), hint: "The key is 'SILENT'.", difficulty: 'Hard', params: { key: "SILENT" } },
+  { id: 'v19', countryId: 'coast', name: "Golden Key", cipherType: 'vigenere', plaintext: "THE ANCIENT GOLDEN KEY WAS THE ONLY THING THAT COULD UNLOCK THE MYSTERIOUS CHEST WHICH HAD REMAINED SEALED FOR HUNDREDS OF YEARS IN THE ATTIC", ciphertext: encrypt("THE ANCIENT GOLDEN KEY WAS THE ONLY THING THAT COULD UNLOCK THE MYSTERIOUS CHEST WHICH HAD REMAINED SEALED FOR HUNDREDS OF YEARS IN THE ATTIC", 'vigenere', { key: "METAL" }), hint: "The key is 'METAL'.", difficulty: 'Hard', params: { key: "METAL" } },
+  { id: 'v20', countryId: 'coast', name: "Final Key", cipherType: 'vigenere', plaintext: "CONGRATULATIONS AGENT YOU HAVE SUCCESSFULLY MASTERED THE COMPLEXITIES OF THE VIGENERE CIPHER AND ARE NOW READY FOR THE MOST CHALLENGING MISSIONS", ciphertext: encrypt("CONGRATULATIONS AGENT YOU HAVE SUCCESSFULLY MASTERED THE COMPLEXITIES OF THE VIGENERE CIPHER AND ARE NOW READY FOR THE MOST CHALLENGING MISSIONS", 'vigenere', { key: "MASTER" }), hint: "The key is 'MASTER'.", difficulty: 'Hard', params: { key: "MASTER" } },
+
+  // RAIL FENCE (r1-r20)
+  { id: 'r1', countryId: 'mountain', name: "Rail Fence Tutorial", cipherType: 'railfence', plaintext: "HELLO WORLD", ciphertext: encrypt("HELLO WORLD", 'railfence', { rails: 2 }), hint: "Two rails zigzag.", difficulty: 'Medium', params: { rails: 2 }, isTutorial: true },
+  { id: 'r2', countryId: 'mountain', name: "Zigzag Signal", cipherType: 'railfence', plaintext: "THE MESSAGE IS HIDDEN", ciphertext: encrypt("THE MESSAGE IS HIDDEN", 'railfence', { rails: 3 }), hint: "Three rails zigzag.", difficulty: 'Medium', params: { rails: 3 } },
+  { id: 'r3', countryId: 'mountain', name: "Wave Pattern", cipherType: 'railfence', plaintext: "THE WAVES ARE HIGH TODAY", ciphertext: encrypt("THE WAVES ARE HIGH TODAY", 'railfence', { rails: 4 }), hint: "Four rails zigzag.", difficulty: 'Hard', params: { rails: 4 } },
+  { id: 'r4', countryId: 'mountain', name: "Mountain Range", cipherType: 'railfence', plaintext: "THE MOUNTAINS ARE COVERED IN SNOW", ciphertext: encrypt("THE MOUNTAINS ARE COVERED IN SNOW", 'railfence', { rails: 2 }), hint: "Two rails.", difficulty: 'Medium', params: { rails: 2 } },
+  { id: 'r5', countryId: 'mountain', name: "Desert Dunes", cipherType: 'railfence', plaintext: "THE DUNES ARE SHIFTING IN THE WIND", ciphertext: encrypt("THE DUNES ARE SHIFTING IN THE WIND", 'railfence', { rails: 3 }), hint: "Three rails.", difficulty: 'Medium', params: { rails: 3 } },
+  { id: 'r6', countryId: 'mountain', name: "Ocean Current", cipherType: 'railfence', plaintext: "THE CURRENT IS STRONG IN THE OCEAN", ciphertext: encrypt("THE CURRENT IS STRONG IN THE OCEAN", 'railfence', { rails: 4 }), hint: "Four rails.", difficulty: 'Hard', params: { rails: 4 } },
+  { id: 'r7', countryId: 'mountain', name: "Forest Trail", cipherType: 'railfence', plaintext: "THE TRAIL IS HIDDEN IN THE FOREST", ciphertext: encrypt("THE TRAIL IS HIDDEN IN THE FOREST", 'railfence', { rails: 2 }), hint: "Two rails.", difficulty: 'Medium', params: { rails: 2 } },
+  { id: 'r8', countryId: 'mountain', name: "Sky Path", cipherType: 'railfence', plaintext: "THE PATH IS CLEAR IN THE SKY", ciphertext: encrypt("THE PATH IS CLEAR IN THE SKY", 'railfence', { rails: 3 }), hint: "Three rails.", difficulty: 'Medium', params: { rails: 3 } },
+  { id: 'r9', countryId: 'mountain', name: "City Grid", cipherType: 'railfence', plaintext: "THE CITY IS A GRID OF STREETS", ciphertext: encrypt("THE CITY IS A GRID OF STREETS", 'railfence', { rails: 4 }), hint: "Four rails.", difficulty: 'Hard', params: { rails: 4 } },
+  { id: 'r10', countryId: 'mountain', name: "Winter Path", cipherType: 'railfence', plaintext: "THE PATH IS COVERED IN ICE", ciphertext: encrypt("THE PATH IS COVERED IN ICE", 'railfence', { rails: 2 }), hint: "Two rails.", difficulty: 'Medium', params: { rails: 2 } },
+  { id: 'r11', countryId: 'mountain', name: "Summer Road", cipherType: 'railfence', plaintext: "THE ROAD IS LONG AND DUSTY", ciphertext: encrypt("THE ROAD IS LONG AND DUSTY", 'railfence', { rails: 3 }), hint: "Three rails.", difficulty: 'Medium', params: { rails: 3 } },
+  { id: 'r12', countryId: 'mountain', name: "Spring Field", cipherType: 'railfence', plaintext: "THE FIELDS ARE GREEN AND LUSH", ciphertext: encrypt("THE FIELDS ARE GREEN AND LUSH", 'railfence', { rails: 4 }), hint: "Four rails.", difficulty: 'Hard', params: { rails: 4 } },
+  { id: 'r13', countryId: 'mountain', name: "Autumn Forest", cipherType: 'railfence', plaintext: "THE FOREST IS RED AND GOLD", ciphertext: encrypt("THE FOREST IS RED AND GOLD", 'railfence', { rails: 2 }), hint: "Two rails.", difficulty: 'Medium', params: { rails: 2 } },
+  { id: 'r14', countryId: 'mountain', name: "Quiet Valley", cipherType: 'railfence', plaintext: "THE VALLEY IS QUIET AND STILL", ciphertext: encrypt("THE VALLEY IS QUIET AND STILL", 'railfence', { rails: 3 }), hint: "Three rails.", difficulty: 'Medium', params: { rails: 3 } },
+  { id: 'r15', countryId: 'mountain', name: "Golden Hill", cipherType: 'railfence', plaintext: "THE HILLS ARE GOLDEN IN THE SUN", ciphertext: encrypt("THE HILLS ARE GOLDEN IN THE SUN", 'railfence', { rails: 4 }), hint: "Four rails.", difficulty: 'Hard', params: { rails: 4 } },
+  { id: 'r16', countryId: 'mountain', name: "Silver Lake", cipherType: 'railfence', plaintext: "THE LAKE IS SILVER IN THE MOONLIGHT", ciphertext: encrypt("THE LAKE IS SILVER IN THE MOONLIGHT", 'railfence', { rails: 2 }), hint: "Two rails.", difficulty: 'Medium', params: { rails: 2 } },
+  { id: 'r17', countryId: 'mountain', name: "Starry Night", cipherType: 'railfence', plaintext: "THE STARS ARE BRIGHT IN THE NIGHT", ciphertext: encrypt("THE STARS ARE BRIGHT IN THE NIGHT", 'railfence', { rails: 3 }), hint: "Three rails.", difficulty: 'Medium', params: { rails: 3 } },
+  { id: 'r18', countryId: 'mountain', name: "Moonlit Path", cipherType: 'railfence', plaintext: "THE PATH IS LIT BY THE MOON", ciphertext: encrypt("THE PATH IS LIT BY THE MOON", 'railfence', { rails: 4 }), hint: "Four rails.", difficulty: 'Hard', params: { rails: 4 } },
+  { id: 'r19', countryId: 'mountain', name: "Golden Gate", cipherType: 'railfence', plaintext: "THE GATE IS MADE OF SOLID GOLD", ciphertext: encrypt("THE GATE IS MADE OF SOLID GOLD", 'railfence', { rails: 2 }), hint: "Two rails.", difficulty: 'Hard', params: { rails: 2 } },
+  { id: 'r20', countryId: 'mountain', name: "Final Rail", cipherType: 'railfence', plaintext: "YOU HAVE MASTERED THE RAIL FENCE CIPHER", ciphertext: encrypt("YOU HAVE MASTERED THE RAIL FENCE CIPHER", 'railfence', { rails: 3 }), hint: "Three rails.", difficulty: 'Hard', params: { rails: 3 } },
+
+  // POLYBIUS (p1-p20)
+  { id: 'p1', countryId: 'island', name: "Polybius Tutorial", cipherType: 'polybius', plaintext: "CIPHER", ciphertext: encrypt("CIPHER", 'polybius'), hint: "Row then Column.", difficulty: 'Medium', isTutorial: true },
+  { id: 'p2', countryId: 'island', name: "Square Coordinates", cipherType: 'polybius', plaintext: "COORDINATES RECEIVED", ciphertext: encrypt("COORDINATES RECEIVED", 'polybius'), hint: "Use the 5x5 grid.", difficulty: 'Medium' },
+  { id: 'p3', countryId: 'island', name: "Grid Master", cipherType: 'polybius', plaintext: "MASTER THE GRID TO WIN", ciphertext: encrypt("MASTER THE GRID TO WIN", 'polybius'), hint: "Row then Column.", difficulty: 'Hard' },
+  { id: 'p4', countryId: 'island', name: "Hidden Message", cipherType: 'polybius', plaintext: "THE MESSAGE IS IN THE GRID", ciphertext: encrypt("THE MESSAGE IS IN THE GRID", 'polybius'), hint: "5x5 square.", difficulty: 'Medium' },
+  { id: 'p5', countryId: 'island', name: "Secret Code", cipherType: 'polybius', plaintext: "THE CODE IS HIDDEN IN THE SQUARE", ciphertext: encrypt("THE CODE IS HIDDEN IN THE SQUARE", 'polybius'), hint: "Row then Column.", difficulty: 'Medium' },
+  { id: 'p6', countryId: 'island', name: "Ancient Square", cipherType: 'polybius', plaintext: "THE SQUARE IS ANCIENT AND WISE", ciphertext: encrypt("THE SQUARE IS ANCIENT AND WISE", 'polybius'), hint: "5x5 grid.", difficulty: 'Hard' },
+  { id: 'p7', countryId: 'island', name: "Mystic Grid", cipherType: 'polybius', plaintext: "THE GRID HAS MYSTIC POWERS", ciphertext: encrypt("THE GRID HAS MYSTIC POWERS", 'polybius'), hint: "Row then Column.", difficulty: 'Medium' },
+  { id: 'p8', countryId: 'island', name: "Silent Square", cipherType: 'polybius', plaintext: "THE SQUARE IS SILENT AND STILL", ciphertext: encrypt("THE SQUARE IS SILENT AND STILL", 'polybius'), hint: "5x5 square.", difficulty: 'Medium' },
+  { id: 'p9', countryId: 'island', name: "Golden Grid", cipherType: 'polybius', plaintext: "THE GRID IS MADE OF GOLD", ciphertext: encrypt("THE GRID IS MADE OF GOLD", 'polybius'), hint: "Row then Column.", difficulty: 'Hard' },
+  { id: 'p10', countryId: 'island', name: "Silver Square", cipherType: 'polybius', plaintext: "THE SQUARE IS MADE OF SILVER", ciphertext: encrypt("THE SQUARE IS MADE OF SILVER", 'polybius'), hint: "5x5 grid.", difficulty: 'Medium' },
+  { id: 'p11', countryId: 'island', name: "Crystal Grid", cipherType: 'polybius', plaintext: "THE GRID IS MADE OF CRYSTAL", ciphertext: encrypt("THE GRID IS MADE OF CRYSTAL", 'polybius'), hint: "Row then Column.", difficulty: 'Medium' },
+  { id: 'p12', countryId: 'island', name: "Diamond Square", cipherType: 'polybius', plaintext: "THE SQUARE IS MADE OF DIAMOND", ciphertext: encrypt("THE SQUARE IS MADE OF DIAMOND", 'polybius'), hint: "5x5 square.", difficulty: 'Hard' },
+  { id: 'p13', countryId: 'island', name: "Emerald Grid", cipherType: 'polybius', plaintext: "THE GRID IS MADE OF EMERALD", ciphertext: encrypt("THE GRID IS MADE OF EMERALD", 'polybius'), hint: "Row then Column.", difficulty: 'Medium' },
+  { id: 'p14', countryId: 'island', name: "Ruby Square", cipherType: 'polybius', plaintext: "THE SQUARE IS MADE OF RUBY", ciphertext: encrypt("THE SQUARE IS MADE OF RUBY", 'polybius'), hint: "5x5 grid.", difficulty: 'Medium' },
+  { id: 'p15', countryId: 'island', name: "Sapphire Grid", cipherType: 'polybius', plaintext: "THE GRID IS MADE OF SAPPHIRE", ciphertext: encrypt("THE GRID IS MADE OF SAPPHIRE", 'polybius'), hint: "Row then Column.", difficulty: 'Hard' },
+  { id: 'p16', countryId: 'island', name: "Topaz Square", cipherType: 'polybius', plaintext: "THE SQUARE IS MADE OF TOPAZ", ciphertext: encrypt("THE SQUARE IS MADE OF TOPAZ", 'polybius'), hint: "5x5 square.", difficulty: 'Medium' },
+  { id: 'p17', countryId: 'island', name: "Opal Grid", cipherType: 'polybius', plaintext: "THE GRID IS MADE OF OPAL", ciphertext: encrypt("THE GRID IS MADE OF OPAL", 'polybius'), hint: "Row then Column.", difficulty: 'Medium' },
+  { id: 'p18', countryId: 'island', name: "Pearl Square", cipherType: 'polybius', plaintext: "THE SQUARE IS MADE OF PEARL", ciphertext: encrypt("THE SQUARE IS MADE OF PEARL", 'polybius'), hint: "5x5 grid.", difficulty: 'Hard' },
+  { id: 'p19', countryId: 'island', name: "Jade Grid", cipherType: 'polybius', plaintext: "THE GRID IS MADE OF JADE", ciphertext: encrypt("THE GRID IS MADE OF JADE", 'polybius'), hint: "Row then Column.", difficulty: 'Hard' },
+  { id: 'p20', countryId: 'island', name: "Final Square", cipherType: 'polybius', plaintext: "YOU HAVE MASTERED THE POLYBIUS SQUARE", ciphertext: encrypt("YOU HAVE MASTERED THE POLYBIUS SQUARE", 'polybius'), hint: "5x5 square.", difficulty: 'Hard' },
+
+  // MONOALPHABETIC (m1-m10)
+  { id: 'm1', countryId: 'island', name: "Monoalphabetic Tutorial", cipherType: 'monoalphabetic', plaintext: "THE QUICK BROWN FOX JUMPS OVER THE LAZY DOG WHILE THE BRIGHT SUN SHINES DOWN ON THE GREEN FIELDS OF THE COUNTRY SIDE WHERE LIFE IS PEACEFUL AND CALM", ciphertext: encrypt("THE QUICK BROWN FOX JUMPS OVER THE LAZY DOG WHILE THE BRIGHT SUN SHINES DOWN ON THE GREEN FIELDS OF THE COUNTRY SIDE WHERE LIFE IS PEACEFUL AND CALM", 'monoalphabetic', { alphabet: "XPMGTORACEFHLBDKYSNUVZJIWQ" }), hint: "Frequency analysis is your friend.", difficulty: 'Hard', params: { alphabet: "XPMGTORACEFHLBDKYSNUVZJIWQ" }, isTutorial: true },
+  { id: 'm2', countryId: 'island', name: "Short Secret", cipherType: 'monoalphabetic', plaintext: "STAY SAFE IN THE SHADOWS UNTIL THE SIGNAL IS GIVEN BY THE LEADER OF THE RESISTANCE MOVEMENT IN THE HEART OF THE OCCUPIED CITY", ciphertext: encrypt("STAY SAFE IN THE SHADOWS UNTIL THE SIGNAL IS GIVEN BY THE LEADER OF THE RESISTANCE MOVEMENT IN THE HEART OF THE OCCUPIED CITY", 'monoalphabetic', { alphabet: "QWERTYUIOPASDFGHJKLZXCVBNM" }), hint: "Longer messages are easier to crack with frequency analysis!", difficulty: 'Hard', params: { alphabet: "QWERTYUIOPASDFGHJKLZXCVBNM" } },
+  { id: 'm3', countryId: 'island', name: "Agent Briefing", cipherType: 'monoalphabetic', plaintext: "MEET THE CONTACT AT THE PIER AT MIDNIGHT SHARP DO NOT BE LATE AS THE CARGO MUST BE EXCHANGED BEFORE THE PATROL ARRIVES AT THE DOCKS", ciphertext: encrypt("MEET THE CONTACT AT THE PIER AT MIDNIGHT SHARP DO NOT BE LATE AS THE CARGO MUST BE EXCHANGED BEFORE THE PATROL ARRIVES AT THE DOCKS", 'monoalphabetic', { alphabet: "MNBVCXZLKJHGFDSAPOIUYTREWQ" }), hint: "Look for 'THE' and 'AT'.", difficulty: 'Hard', params: { alphabet: "MNBVCXZLKJHGFDSAPOIUYTREWQ" } },
+
+  // PLAYFAIR (f1-m10)
+  { id: 'f1', countryId: 'island', name: "Playfair Tutorial", cipherType: 'playfair', plaintext: "HIDE THE GOLD IN THE ANCIENT TEMPLE BEYOND THE GREAT MOUNTAINS WHERE THE DRAGONS SLEEP AND THE TREASURE IS GUARDED BY THE SPIRITS OF THE PAST", ciphertext: encrypt("HIDE THE GOLD IN THE ANCIENT TEMPLE BEYOND THE GREAT MOUNTAINS WHERE THE DRAGONS SLEEP AND THE TREASURE IS GUARDED BY THE SPIRITS OF THE PAST", 'playfair', { key: "PLAYFAIR" }), hint: "Key is 'PLAYFAIR'.", difficulty: 'Hard', params: { key: "PLAYFAIR" }, isTutorial: true },
+  { id: 'f2', countryId: 'island', name: "Double Trouble", cipherType: 'playfair', plaintext: "THE BALLOON WILL ASCEND AT NOON CARRYING THE SECRET DOCUMENTS TO THE ALLIED FORCES WAITING ACROSS THE BORDER IN THE NEUTRAL TERRITORY", ciphertext: encrypt("THE BALLOON WILL ASCEND AT NOON CARRYING THE SECRET DOCUMENTS TO THE ALLIED FORCES WAITING ACROSS THE BORDER IN THE NEUTRAL TERRITORY", 'playfair', { key: "CIPHER" }), hint: "Key is 'CIPHER'. Watch for double letters.", difficulty: 'Hard', params: { key: "CIPHER" } },
+
+  // PRO LEVELS
+  { id: 'c-pro-1', countryId: 'north', name: "Pro: Imperial Command", cipherType: 'caesar', plaintext: "THE LEGIONS SHALL MARCH AT THE FIRST LIGHT OF THE NEW MOON", ciphertext: encrypt("THE LEGIONS SHALL MARCH AT THE FIRST LIGHT OF THE NEW MOON", 'caesar', { shift: 22 }), hint: "Shift is 22.", difficulty: 'Hard', params: { shift: 22 }, isProLevel: true },
+  { id: 'a-pro-1', countryId: 'north', name: "Pro: Infinite Mirror", cipherType: 'atbash', plaintext: "THE REFLECTION OF THE SOUL IS FOUND IN THE DEPTHS OF THE VOID", ciphertext: encrypt("THE REFLECTION OF THE SOUL IS FOUND IN THE DEPTHS OF THE VOID", 'atbash'), hint: "Atbash mapping.", difficulty: 'Hard', isProLevel: true },
+  { id: 'v-pro-1', countryId: 'coast', name: "Pro: Enigma Protocol", cipherType: 'vigenere', plaintext: "THE ENIGMA MACHINE WAS BROKEN BY THE BRILLIANCE OF ALAN TURING", ciphertext: encrypt("THE ENIGMA MACHINE WAS BROKEN BY THE BRILLIANCE OF ALAN TURING", 'vigenere', { key: "BLETCHLEY" }), hint: "The key is 'BLETCHLEY'.", difficulty: 'Hard', params: { key: "BLETCHLEY" }, isProLevel: true },
+  { id: 'r-pro-1', countryId: 'mountain', name: "Pro: Storm Surge", cipherType: 'railfence', plaintext: "THE STORM SURGE WILL REACH THE COASTLINE BY MIDNIGHT TONIGHT", ciphertext: encrypt("THE STORM SURGE WILL REACH THE COASTLINE BY MIDNIGHT TONIGHT", 'railfence', { rails: 5 }), hint: "Five rails zigzag.", difficulty: 'Hard', params: { rails: 5 }, isProLevel: true },
+  { id: 'p-pro-1', countryId: 'island', name: "Pro: Obsidian Grid", cipherType: 'polybius', plaintext: "THE OBSIDIAN GRID CONTAINS THE SECRETS OF THE ANCIENT CIVILIZATION", ciphertext: encrypt("THE OBSIDIAN GRID CONTAINS THE SECRETS OF THE ANCIENT CIVILIZATION", 'polybius'), hint: "5x5 square.", difficulty: 'Hard', isProLevel: true },
+
+  // AFFINE (af1-af20)
+  { id: 'af1', countryId: 'desert', name: "Affine Tutorial", cipherType: 'affine', plaintext: "THE AFFINE CIPHER IS A LINEAR SUBSTITUTION", ciphertext: encrypt("THE AFFINE CIPHER IS A LINEAR SUBSTITUTION", 'affine', { a: 5, b: 8 }), hint: "a=5, b=8", difficulty: 'Medium', params: { a: 5, b: 8 }, isTutorial: true },
+  { id: 'af2', countryId: 'desert', name: "Linear Logic", cipherType: 'affine', plaintext: "MATHEMATICS IS THE LANGUAGE OF THE UNIVERSE", ciphertext: encrypt("MATHEMATICS IS THE LANGUAGE OF THE UNIVERSE", 'affine', { a: 3, b: 7 }), hint: "a=3, b=7", difficulty: 'Medium', params: { a: 3, b: 7 } },
+  { id: 'af3', countryId: 'desert', name: "Prime Shift", cipherType: 'affine', plaintext: "PRIME NUMBERS ARE THE ATOMS OF ARITHMETIC", ciphertext: encrypt("PRIME NUMBERS ARE THE ATOMS OF ARITHMETIC", 'affine', { a: 7, b: 10 }), hint: "a=7, b=10", difficulty: 'Medium', params: { a: 7, b: 10 } },
+  { id: 'af4', countryId: 'desert', name: "Modular Mystery", cipherType: 'affine', plaintext: "THE REMAINDER OF THE TRUTH IS STILL THE TRUTH", ciphertext: encrypt("THE REMAINDER OF THE TRUTH IS STILL THE TRUTH", 'affine', { a: 9, b: 3 }), hint: "a=9, b=3", difficulty: 'Medium', params: { a: 9, b: 3 } },
+  { id: 'af5', countryId: 'desert', name: "Calculation", cipherType: 'affine', plaintext: "EVERY CALCULATION BRINGS US CLOSER TO THE ANSWER", ciphertext: encrypt("EVERY CALCULATION BRINGS US CLOSER TO THE ANSWER", 'affine', { a: 11, b: 5 }), hint: "a=11, b=5", difficulty: 'Medium', params: { a: 11, b: 5 } },
+  { id: 'af6', countryId: 'desert', name: "Inverse Action", cipherType: 'affine', plaintext: "TO DECRYPT YOU MUST FIND THE MODULAR INVERSE", ciphertext: encrypt("TO DECRYPT YOU MUST FIND THE MODULAR INVERSE", 'affine', { a: 15, b: 12 }), hint: "a=15, b=12", difficulty: 'Medium', params: { a: 15, b: 12 } },
+  { id: 'af7', countryId: 'desert', name: "Constant Change", cipherType: 'affine', plaintext: "THE ONLY CONSTANT IN LIFE IS CHANGE ITSELF", ciphertext: encrypt("THE ONLY CONSTANT IN LIFE IS CHANGE ITSELF", 'affine', { a: 17, b: 1 }), hint: "a=17, b=1", difficulty: 'Medium', params: { a: 17, b: 1 } },
+  { id: 'af8', countryId: 'desert', name: "Algebraic Art", cipherType: 'affine', plaintext: "ALGEBRA IS THE INTELLECTUAL INSTRUMENT", ciphertext: encrypt("ALGEBRA IS THE INTELLECTUAL INSTRUMENT", 'affine', { a: 19, b: 15 }), hint: "a=19, b=15", difficulty: 'Medium', params: { a: 19, b: 15 } },
+  { id: 'af9', countryId: 'desert', name: "Equation", cipherType: 'affine', plaintext: "SOLVE THE EQUATION TO UNLOCK THE NEXT LEVEL", ciphertext: encrypt("SOLVE THE EQUATION TO UNLOCK THE NEXT LEVEL", 'affine', { a: 21, b: 20 }), hint: "a=21, b=20", difficulty: 'Medium', params: { a: 21, b: 20 } },
+  { id: 'af10', countryId: 'desert', name: "Numeric Key", cipherType: 'affine', plaintext: "NUMBERS HAVE A WAY OF TELLING THE TRUTH", ciphertext: encrypt("NUMBERS HAVE A WAY OF TELLING THE TRUTH", 'affine', { a: 23, b: 4 }), hint: "a=23, b=4", difficulty: 'Medium', params: { a: 23, b: 4 } },
+  { id: 'af11', countryId: 'desert', name: "Coprime Connection", cipherType: 'affine', plaintext: "COPRIME NUMBERS SHARE NO COMMON FACTORS", ciphertext: encrypt("COPRIME NUMBERS SHARE NO COMMON FACTORS", 'affine', { a: 25, b: 11 }), hint: "a=25, b=11", difficulty: 'Medium', params: { a: 25, b: 11 } },
+  { id: 'af12', countryId: 'desert', name: "Linear Link", cipherType: 'affine', plaintext: "A STRAIGHT LINE IS THE SHORTEST DISTANCE", ciphertext: encrypt("A STRAIGHT LINE IS THE SHORTEST DISTANCE", 'affine', { a: 5, b: 19 }), hint: "a=5, b=19", difficulty: 'Medium', params: { a: 5, b: 19 } },
+  { id: 'af13', countryId: 'desert', name: "Function", cipherType: 'affine', plaintext: "THE FUNCTION MAPS INPUTS TO UNIQUE OUTPUTS", ciphertext: encrypt("THE FUNCTION MAPS INPUTS TO UNIQUE OUTPUTS", 'affine', { a: 3, b: 25 }), hint: "a=3, b=25", difficulty: 'Medium', params: { a: 3, b: 25 } },
+  { id: 'af14', countryId: 'desert', name: "Transformation", cipherType: 'affine', plaintext: "DATA TRANSFORMATION IS KEY TO SECURITY", ciphertext: encrypt("DATA TRANSFORMATION IS KEY TO SECURITY", 'affine', { a: 7, b: 2 }), hint: "a=7, b=2", difficulty: 'Medium', params: { a: 7, b: 2 } },
+  { id: 'af15', countryId: 'desert', name: "Arithmetic", cipherType: 'affine', plaintext: "MODULAR ARITHMETIC IS THE CLOCKWORK OF CODES", ciphertext: encrypt("MODULAR ARITHMETIC IS THE CLOCKWORK OF CODES", 'affine', { a: 9, b: 14 }), hint: "a=9, b=14", difficulty: 'Medium', params: { a: 9, b: 14 } },
+  { id: 'af16', countryId: 'desert', name: "Pattern", cipherType: 'affine', plaintext: "RECOGNIZING PATTERNS IS THE FIRST STEP", ciphertext: encrypt("RECOGNIZING PATTERNS IS THE FIRST STEP", 'affine', { a: 11, b: 22 }), hint: "a=11, b=22", difficulty: 'Medium', params: { a: 11, b: 22 } },
+  { id: 'af17', countryId: 'desert', name: "Logic", cipherType: 'affine', plaintext: "PURE LOGIC IS THE ULTIMATE WEAPON", ciphertext: encrypt("PURE LOGIC IS THE ULTIMATE WEAPON", 'affine', { a: 15, b: 6 }), hint: "a=15, b=6", difficulty: 'Medium', params: { a: 15, b: 6 } },
+  { id: 'af18', countryId: 'desert', name: "Sequence", cipherType: 'affine', plaintext: "THE SEQUENCE OF EVENTS IS PREDETERMINED", ciphertext: encrypt("THE SEQUENCE OF EVENTS IS PREDETERMINED", 'affine', { a: 17, b: 18 }), hint: "a=17, b=18", difficulty: 'Medium', params: { a: 17, b: 18 } },
+  { id: 'af19', countryId: 'desert', name: "Structure", cipherType: 'affine', plaintext: "THE STRUCTURE OF THE CODE IS ELEGANT", ciphertext: encrypt("THE STRUCTURE OF THE CODE IS ELEGANT", 'affine', { a: 19, b: 9 }), hint: "a=19, b=9", difficulty: 'Medium', params: { a: 19, b: 9 } },
+  { id: 'af20', countryId: 'desert', name: "Mastery", cipherType: 'affine', plaintext: "YOU HAVE MASTERED THE AFFINE CIPHER", ciphertext: encrypt("YOU HAVE MASTERED THE AFFINE CIPHER", 'affine', { a: 21, b: 13 }), hint: "a=21, b=13", difficulty: 'Medium', params: { a: 21, b: 13 } },
+
+  // BEAUFORT (bf1-bf20)
+  { id: 'bf1', countryId: 'ocean', name: "Beaufort Tutorial", cipherType: 'beaufort', plaintext: "THE BEAUFORT CIPHER IS A VARIANT OF VIGENERE", ciphertext: encrypt("THE BEAUFORT CIPHER IS A VARIANT OF VIGENERE", 'beaufort', { key: "KEY" }), hint: "Key is 'KEY'", difficulty: 'Hard', params: { key: "KEY" }, isTutorial: true },
+  { id: 'bf2', countryId: 'coast', name: "Reciprocal", cipherType: 'beaufort', plaintext: "IT IS A RECIPROCAL CIPHER MEANING ENCRYPTION AND DECRYPTION ARE THE SAME", ciphertext: encrypt("IT IS A RECIPROCAL CIPHER MEANING ENCRYPTION AND DECRYPTION ARE THE SAME", 'beaufort', { key: "SAME" }), hint: "Key is 'SAME'", difficulty: 'Hard', params: { key: "SAME" } },
+  { id: 'bf3', countryId: 'coast', name: "Sir Francis", cipherType: 'beaufort', plaintext: "NAMED AFTER SIR FRANCIS BEAUFORT WHO CREATED THE WIND SCALE", ciphertext: encrypt("NAMED AFTER SIR FRANCIS BEAUFORT WHO CREATED THE WIND SCALE", 'beaufort', { key: "WIND" }), hint: "Key is 'WIND'", difficulty: 'Hard', params: { key: "WIND" } },
+  { id: 'bf4', countryId: 'coast', name: "Storm Warning", cipherType: 'beaufort', plaintext: "A STORM IS BREWING ON THE HORIZON OF SECRECY", ciphertext: encrypt("A STORM IS BREWING ON THE HORIZON OF SECRECY", 'beaufort', { key: "STORM" }), hint: "Key is 'STORM'", difficulty: 'Hard', params: { key: "STORM" } },
+  { id: 'bf5', countryId: 'coast', name: "Naval Code", cipherType: 'beaufort', plaintext: "NAVAL CODES WERE OFTEN USED TO PROTECT FLEET MOVEMENTS", ciphertext: encrypt("NAVAL CODES WERE OFTEN USED TO PROTECT FLEET MOVEMENTS", 'beaufort', { key: "FLEET" }), hint: "Key is 'FLEET'", difficulty: 'Hard', params: { key: "FLEET" } },
+  { id: 'bf6', countryId: 'coast', name: "Compass", cipherType: 'beaufort', plaintext: "THE COMPASS ALWAYS POINTS TO THE TRUTH", ciphertext: encrypt("THE COMPASS ALWAYS POINTS TO THE TRUTH", 'beaufort', { key: "NORTH" }), hint: "Key is 'NORTH'", difficulty: 'Hard', params: { key: "NORTH" } },
+  { id: 'bf7', countryId: 'coast', name: "Anchor", cipherType: 'beaufort', plaintext: "AN ANCHOR HOLDS THE SHIP STEADY IN ROUGH SEAS", ciphertext: encrypt("AN ANCHOR HOLDS THE SHIP STEADY IN ROUGH SEAS", 'beaufort', { key: "STEADY" }), hint: "Key is 'STEADY'", difficulty: 'Hard', params: { key: "STEADY" } },
+  { id: 'bf8', countryId: 'coast', name: "Lighthouse", cipherType: 'beaufort', plaintext: "THE LIGHTHOUSE GUIDES THE WEARY TRAVELER HOME", ciphertext: encrypt("THE LIGHTHOUSE GUIDES THE WEARY TRAVELER HOME", 'beaufort', { key: "GUIDE" }), hint: "Key is 'GUIDE'", difficulty: 'Hard', params: { key: "GUIDE" } },
+  { id: 'bf9', countryId: 'coast', name: "Deep Sea", cipherType: 'beaufort', plaintext: "THE DEEPEST SECRETS ARE BURIED AT THE BOTTOM OF THE OCEAN", ciphertext: encrypt("THE DEEPEST SECRETS ARE BURIED AT THE BOTTOM OF THE OCEAN", 'beaufort', { key: "OCEAN" }), hint: "Key is 'OCEAN'", difficulty: 'Hard', params: { key: "OCEAN" } },
+  { id: 'bf10', countryId: 'coast', name: "Tide", cipherType: 'beaufort', plaintext: "THE TIDE TURNS FOR NO MAN", ciphertext: encrypt("THE TIDE TURNS FOR NO MAN", 'beaufort', { key: "TIME" }), hint: "Key is 'TIME'", difficulty: 'Hard', params: { key: "TIME" } },
+  { id: 'bf11', countryId: 'coast', name: "Siren", cipherType: 'beaufort', plaintext: "THE SIREN SONG LURES THE UNWARY TO THEIR DOOM", ciphertext: encrypt("THE SIREN SONG LURES THE UNWARY TO THEIR DOOM", 'beaufort', { key: "SONG" }), hint: "Key is 'SONG'", difficulty: 'Hard', params: { key: "SONG" } },
+  { id: 'bf12', countryId: 'coast', name: "Trident", cipherType: 'beaufort', plaintext: "THE TRIDENT IS THE SYMBOL OF POWER OVER THE SEAS", ciphertext: encrypt("THE TRIDENT IS THE SYMBOL OF POWER OVER THE SEAS", 'beaufort', { key: "POWER" }), hint: "Key is 'POWER'", difficulty: 'Hard', params: { key: "POWER" } },
+  { id: 'bf13', countryId: 'coast', name: "Coral", cipherType: 'beaufort', plaintext: "CORAL REEFS ARE THE RAINFORESTS OF THE SEA", ciphertext: encrypt("CORAL REEFS ARE THE RAINFORESTS OF THE SEA", 'beaufort', { key: "REEF" }), hint: "Key is 'REEF'", difficulty: 'Hard', params: { key: "REEF" } },
+  { id: 'bf14', countryId: 'coast', name: "Abyss", cipherType: 'beaufort', plaintext: "WHEN YOU LOOK INTO THE ABYSS THE ABYSS LOOKS INTO YOU", ciphertext: encrypt("WHEN YOU LOOK INTO THE ABYSS THE ABYSS LOOKS INTO YOU", 'beaufort', { key: "DARK" }), hint: "Key is 'DARK'", difficulty: 'Hard', params: { key: "DARK" } },
+  { id: 'bf15', countryId: 'coast', name: "Voyage", cipherType: 'beaufort', plaintext: "A LONG VOYAGE REQUIRES A STURDY VESSEL", ciphertext: encrypt("A LONG VOYAGE REQUIRES A STURDY VESSEL", 'beaufort', { key: "SHIP" }), hint: "Key is 'SHIP'", difficulty: 'Hard', params: { key: "SHIP" } },
+  { id: 'bf16', countryId: 'coast', name: "Horizon", cipherType: 'beaufort', plaintext: "THE HORIZON IS THE LIMIT OF OUR VISION", ciphertext: encrypt("THE HORIZON IS THE LIMIT OF OUR VISION", 'beaufort', { key: "LIMIT" }), hint: "Key is 'LIMIT'", difficulty: 'Hard', params: { key: "LIMIT" } },
+  { id: 'bf17', countryId: 'coast', name: "Current", cipherType: 'beaufort', plaintext: "THE CURRENT CARRIES US TO UNKNOWN LANDS", ciphertext: encrypt("THE CURRENT CARRIES US TO UNKNOWN LANDS", 'beaufort', { key: "LAND" }), hint: "Key is 'LAND'", difficulty: 'Hard', params: { key: "LAND" } },
+  { id: 'bf18', countryId: 'coast', name: "Island", cipherType: 'beaufort', plaintext: "NO MAN IS AN ISLAND ENTIRE OF ITSELF", ciphertext: encrypt("NO MAN IS AN ISLAND ENTIRE OF ITSELF", 'beaufort', { key: "ALONE" }), hint: "Key is 'ALONE'", difficulty: 'Hard', params: { key: "ALONE" } },
+  { id: 'bf19', countryId: 'coast', name: "Treasure", cipherType: 'beaufort', plaintext: "THE TRUE TREASURE IS THE KNOWLEDGE WE GAIN", ciphertext: encrypt("THE TRUE TREASURE IS THE KNOWLEDGE WE GAIN", 'beaufort', { key: "GOLD" }), hint: "Key is 'GOLD'", difficulty: 'Hard', params: { key: "GOLD" } },
+  { id: 'bf20', countryId: 'coast', name: "Mastery", cipherType: 'beaufort', plaintext: "YOU HAVE MASTERED THE BEAUFORT CIPHER", ciphertext: encrypt("YOU HAVE MASTERED THE BEAUFORT CIPHER", 'beaufort', { key: "MASTER" }), hint: "Key is 'MASTER'", difficulty: 'Hard', params: { key: "MASTER" } },
+
+  // COLUMNAR (ct1-ct20)
+  { id: 'ct1', countryId: 'industrial', name: "Columnar Tutorial", cipherType: 'columnar', plaintext: "COLUMNAR TRANSPOSITION REARRANGES THE LETTERS", ciphertext: encrypt("COLUMNAR TRANSPOSITION REARRANGES THE LETTERS", 'columnar', { key: "KEY" }), hint: "Key is 'KEY'", difficulty: 'Hard', params: { key: "KEY" }, isTutorial: true },
+  { id: 'ct2', countryId: 'mountain', name: "Grid System", cipherType: 'columnar', plaintext: "THE MESSAGE IS WRITTEN IN ROWS AND READ IN COLUMNS", ciphertext: encrypt("THE MESSAGE IS WRITTEN IN ROWS AND READ IN COLUMNS", 'columnar', { key: "GRID" }), hint: "Key is 'GRID'", difficulty: 'Hard', params: { key: "GRID" } },
+  { id: 'ct3', countryId: 'mountain', name: "Alphabetical Order", cipherType: 'columnar', plaintext: "THE ORDER OF COLUMNS IS DETERMINED BY THE KEY", ciphertext: encrypt("THE ORDER OF COLUMNS IS DETERMINED BY THE KEY", 'columnar', { key: "ORDER" }), hint: "Key is 'ORDER'", difficulty: 'Hard', params: { key: "ORDER" } },
+  { id: 'ct4', countryId: 'mountain', name: "Transposition", cipherType: 'columnar', plaintext: "TRANSPOSITION CIPHERS DO NOT CHANGE THE LETTERS", ciphertext: encrypt("TRANSPOSITION CIPHERS DO NOT CHANGE THE LETTERS", 'columnar', { key: "MOVE" }), hint: "Key is 'MOVE'", difficulty: 'Hard', params: { key: "MOVE" } },
+  { id: 'ct5', countryId: 'mountain', name: "Scramble", cipherType: 'columnar', plaintext: "THE LETTERS ARE SCRAMBLED BUT STILL THE SAME", ciphertext: encrypt("THE LETTERS ARE SCRAMBLED BUT STILL THE SAME", 'columnar', { key: "MIX" }), hint: "Key is 'MIX'", difficulty: 'Hard', params: { key: "MIX" } },
+  { id: 'ct6', countryId: 'mountain', name: "Keyword", cipherType: 'columnar', plaintext: "THE KEYWORD IS THE HEART OF THE CIPHER", ciphertext: encrypt("THE KEYWORD IS THE HEART OF THE CIPHER", 'columnar', { key: "HEART" }), hint: "Key is 'HEART'", difficulty: 'Hard', params: { key: "HEART" } },
+  { id: 'ct7', countryId: 'mountain', name: "Matrix", cipherType: 'columnar', plaintext: "A MATRIX OF LETTERS HIDES THE TRUTH", ciphertext: encrypt("A MATRIX OF LETTERS HIDES THE TRUTH", 'columnar', { key: "MATRIX" }), hint: "Key is 'MATRIX'", difficulty: 'Hard', params: { key: "MATRIX" } },
+  { id: 'ct8', countryId: 'mountain', name: "Pattern", cipherType: 'columnar', plaintext: "FOLLOW THE PATTERN TO DECRYPT THE SIGNAL", ciphertext: encrypt("FOLLOW THE PATTERN TO DECRYPT THE SIGNAL", 'columnar', { key: "FOLLOW" }), hint: "Key is 'FOLLOW'", difficulty: 'Hard', params: { key: "FOLLOW" } },
+  { id: 'ct9', countryId: 'mountain', name: "Hidden", cipherType: 'columnar', plaintext: "THE TRUTH IS HIDDEN IN PLAIN SIGHT", ciphertext: encrypt("THE TRUTH IS HIDDEN IN PLAIN SIGHT", 'columnar', { key: "SIGHT" }), hint: "Key is 'SIGHT'", difficulty: 'Hard', params: { key: "SIGHT" } },
+  { id: 'ct10', countryId: 'mountain', name: "Secret", cipherType: 'columnar', plaintext: "KEEP THE SECRET SAFE FROM PRYING EYES", ciphertext: encrypt("KEEP THE SECRET SAFE FROM PRYING EYES", 'columnar', { key: "SAFE" }), hint: "Key is 'SAFE'", difficulty: 'Hard', params: { key: "SAFE" } },
+  { id: 'ct11', countryId: 'mountain', name: "Encryption", cipherType: 'columnar', plaintext: "ENCRYPTION IS THE SHIELD OF PRIVACY", ciphertext: encrypt("ENCRYPTION IS THE SHIELD OF PRIVACY", 'columnar', { key: "SHIELD" }), hint: "Key is 'SHIELD'", difficulty: 'Hard', params: { key: "SHIELD" } },
+  { id: 'ct12', countryId: 'mountain', name: "Privacy", cipherType: 'columnar', plaintext: "PRIVACY IS A FUNDAMENTAL HUMAN RIGHT", ciphertext: encrypt("PRIVACY IS A FUNDAMENTAL HUMAN RIGHT", 'columnar', { key: "RIGHT" }), hint: "Key is 'RIGHT'", difficulty: 'Hard', params: { key: "RIGHT" } },
+  { id: 'ct13', countryId: 'mountain', name: "Freedom", cipherType: 'columnar', plaintext: "FREEDOM OF SPEECH REQUIRES SECURE CHANNELS", ciphertext: encrypt("FREEDOM OF SPEECH REQUIRES SECURE CHANNELS", 'columnar', { key: "SPEECH" }), hint: "Key is 'SPEECH'", difficulty: 'Hard', params: { key: "SPEECH" } },
+  { id: 'ct14', countryId: 'mountain', name: "Channel", cipherType: 'columnar', plaintext: "THE CHANNEL IS SECURE AND PROTECTED", ciphertext: encrypt("THE CHANNEL IS SECURE AND PROTECTED", 'columnar', { key: "SECURE" }), hint: "Key is 'SECURE'", difficulty: 'Hard', params: { key: "SECURE" } },
+  { id: 'ct15', countryId: 'mountain', name: "Protection", cipherType: 'columnar', plaintext: "PROTECTION IS NECESSARY IN THE DIGITAL AGE", ciphertext: encrypt("PROTECTION IS NECESSARY IN THE DIGITAL AGE", 'columnar', { key: "DIGITAL" }), hint: "Key is 'DIGITAL'", difficulty: 'Hard', params: { key: "DIGITAL" } },
+  { id: 'ct16', countryId: 'mountain', name: "Digital", cipherType: 'columnar', plaintext: "THE DIGITAL WORLD IS FULL OF DANGERS", ciphertext: encrypt("THE DIGITAL WORLD IS FULL OF DANGERS", 'columnar', { key: "DANGER" }), hint: "Key is 'DANGER'", difficulty: 'Hard', params: { key: "DANGER" } },
+  { id: 'ct17', countryId: 'mountain', name: "Danger", cipherType: 'columnar', plaintext: "DANGER LURKS IN EVERY CORNER OF THE WEB", ciphertext: encrypt("DANGER LURKS IN EVERY CORNER OF THE WEB", 'columnar', { key: "WEB" }), hint: "Key is 'WEB'", difficulty: 'Hard', params: { key: "WEB" } },
+  { id: 'ct18', countryId: 'mountain', name: "Web", cipherType: 'columnar', plaintext: "THE WEB IS A VAST NETWORK OF INFORMATION", ciphertext: encrypt("THE WEB IS A VAST NETWORK OF INFORMATION", 'columnar', { key: "NETWORK" }), hint: "Key is 'NETWORK'", difficulty: 'Hard', params: { key: "NETWORK" } },
+  { id: 'ct19', countryId: 'mountain', name: "Network", cipherType: 'columnar', plaintext: "A NETWORK IS ONLY AS STRONG AS ITS WEAKEST LINK", ciphertext: encrypt("A NETWORK IS ONLY AS STRONG AS ITS WEAKEST LINK", 'columnar', { key: "LINK" }), hint: "Key is 'LINK'", difficulty: 'Hard', params: { key: "LINK" } },
+  { id: 'ct20', countryId: 'mountain', name: "Mastery", cipherType: 'columnar', plaintext: "YOU HAVE MASTERED THE COLUMNAR CIPHER", ciphertext: encrypt("YOU HAVE MASTERED THE COLUMNAR CIPHER", 'columnar', { key: "MASTER" }), hint: "Key is 'MASTER'", difficulty: 'Hard', params: { key: "MASTER" } },
+
+  // HILL (h1-h20)
+  { id: 'h1', countryId: 'volcano', name: "Hill Tutorial", cipherType: 'hill', plaintext: "THE HILL CIPHER USES MATRIX MULTIPLICATION", ciphertext: encrypt("THE HILL CIPHER USES MATRIX MULTIPLICATION", 'hill', { matrix: [[3, 3], [2, 5]] }), hint: "Matrix: [[3,3],[2,5]]", difficulty: 'Hard', params: { matrix: [[3, 3], [2, 5]] }, isTutorial: true },
+  { id: 'h2', countryId: 'desert', name: "Linear Algebra", cipherType: 'hill', plaintext: "LINEAR ALGEBRA IS THE FOUNDATION OF THE HILL CIPHER", ciphertext: encrypt("LINEAR ALGEBRA IS THE FOUNDATION OF THE HILL CIPHER", 'hill', { matrix: [[5, 8], [17, 3]] }), hint: "Matrix: [[5,8],[17,3]]", difficulty: 'Hard', params: { matrix: [[5, 8], [17, 3]] } },
+  { id: 'h3', countryId: 'desert', name: "Polygraphic", cipherType: 'hill', plaintext: "IT IS A POLYGRAPHIC SUBSTITUTION CIPHER", ciphertext: encrypt("IT IS A POLYGRAPHIC SUBSTITUTION CIPHER", 'hill', { matrix: [[7, 12], [11, 9]] }), hint: "Matrix: [[7,12],[11,9]]", difficulty: 'Hard', params: { matrix: [[7, 12], [11, 9]] } },
+  { id: 'h4', countryId: 'desert', name: "Block Cipher", cipherType: 'hill', plaintext: "THE HILL CIPHER ENCRYPTS BLOCKS OF TEXT", ciphertext: encrypt("THE HILL CIPHER ENCRYPTS BLOCKS OF TEXT", 'hill', { matrix: [[1, 2], [3, 5]] }), hint: "Matrix: [[1,2],[3,5]]", difficulty: 'Hard', params: { matrix: [[1, 2], [3, 5]] } },
+  { id: 'h5', countryId: 'desert', name: "Lester Hill", cipherType: 'hill', plaintext: "INVENTED BY LESTER HILL IN NINETEEN TWENTY NINE", ciphertext: encrypt("INVENTED BY LESTER HILL IN NINETEEN TWENTY NINE", 'hill', { matrix: [[3, 2], [5, 7]] }), hint: "Matrix: [[3,2],[5,7]]", difficulty: 'Hard', params: { matrix: [[3, 2], [5, 7]] } },
+  { id: 'h6', countryId: 'desert', name: "Vector", cipherType: 'hill', plaintext: "EACH PAIR OF LETTERS IS A VECTOR", ciphertext: encrypt("EACH PAIR OF LETTERS IS A VECTOR", 'hill', { matrix: [[9, 4], [5, 7]] }), hint: "Matrix: [[9,4],[5,7]]", difficulty: 'Hard', params: { matrix: [[9, 4], [5, 7]] } },
+  { id: 'h7', countryId: 'desert', name: "Transformation", cipherType: 'hill', plaintext: "THE MATRIX TRANSFORMS THE PLAINTEXT VECTOR", ciphertext: encrypt("THE MATRIX TRANSFORMS THE PLAINTEXT VECTOR", 'hill', { matrix: [[11, 8], [3, 7]] }), hint: "Matrix: [[11,8],[3,7]]", difficulty: 'Hard', params: { matrix: [[11, 8], [3, 7]] } },
+  { id: 'h8', countryId: 'desert', name: "Inverse Matrix", cipherType: 'hill', plaintext: "DECRYPTION REQUIRES THE INVERSE MATRIX", ciphertext: encrypt("DECRYPTION REQUIRES THE INVERSE MATRIX", 'hill', { matrix: [[1, 4], [3, 13]] }), hint: "Matrix: [[1,4],[3,13]]", difficulty: 'Hard', params: { matrix: [[1, 4], [3, 13]] } },
+  { id: 'h9', countryId: 'desert', name: "Determinant", cipherType: 'hill', plaintext: "THE DETERMINANT MUST BE COPRIME TO TWENTY SIX", ciphertext: encrypt("THE DETERMINANT MUST BE COPRIME TO TWENTY SIX", 'hill', { matrix: [[3, 5], [1, 2]] }), hint: "Matrix: [[3,5],[1,2]]", difficulty: 'Hard', params: { matrix: [[3, 5], [1, 2]] } },
+  { id: 'h10', countryId: 'desert', name: "Modulo", cipherType: 'hill', plaintext: "ALL CALCULATIONS ARE DONE MODULO TWENTY SIX", ciphertext: encrypt("ALL CALCULATIONS ARE DONE MODULO TWENTY SIX", 'hill', { matrix: [[5, 2], [7, 3]] }), hint: "Matrix: [[5,2],[7,3]]", difficulty: 'Hard', params: { matrix: [[5, 2], [7, 3]] } },
+  { id: 'h11', countryId: 'desert', name: "Security", cipherType: 'hill', plaintext: "THE HILL CIPHER IS RESISTANT TO FREQUENCY ANALYSIS", ciphertext: encrypt("THE HILL CIPHER IS RESISTANT TO FREQUENCY ANALYSIS", 'hill', { matrix: [[7, 3], [11, 5]] }), hint: "Matrix: [[7,3],[11,5]]", difficulty: 'Hard', params: { matrix: [[7, 3], [11, 5]] } },
+  { id: 'h12', countryId: 'desert', name: "Analysis", cipherType: 'hill', plaintext: "BUT IT IS VULNERABLE TO KNOWN PLAINTEXT ATTACKS", ciphertext: encrypt("BUT IT IS VULNERABLE TO KNOWN PLAINTEXT ATTACKS", 'hill', { matrix: [[9, 2], [13, 3]] }), hint: "Matrix: [[9,2],[13,3]]", difficulty: 'Hard', params: { matrix: [[9, 2], [13, 3]] } },
+  { id: 'h13', countryId: 'desert', name: "Complexity", cipherType: 'hill', plaintext: "LARGER MATRICES PROVIDE GREATER SECURITY", ciphertext: encrypt("LARGER MATRICES PROVIDE GREATER SECURITY", 'hill', { matrix: [[1, 6], [1, 7]] }), hint: "Matrix: [[1,6],[1,7]]", difficulty: 'Hard', params: { matrix: [[1, 6], [1, 7]] } },
+  { id: 'h14', countryId: 'desert', name: "Dimension", cipherType: 'hill', plaintext: "THE DIMENSION OF THE MATRIX IS THE BLOCK SIZE", ciphertext: encrypt("THE DIMENSION OF THE MATRIX IS THE BLOCK SIZE", 'hill', { matrix: [[3, 8], [5, 11]] }), hint: "Matrix: [[3,8],[5,11]]", difficulty: 'Hard', params: { matrix: [[3, 8], [5, 11]] } },
+  { id: 'h15', countryId: 'desert', name: "Algebra", cipherType: 'hill', plaintext: "ALGEBRA IS THE KEY TO UNLOCKING THE CODE", ciphertext: encrypt("ALGEBRA IS THE KEY TO UNLOCKING THE CODE", 'hill', { matrix: [[5, 12], [7, 17]] }), hint: "Matrix: [[5,12],[7,17]]", difficulty: 'Hard', params: { matrix: [[5, 12], [7, 17]] } },
+  { id: 'h16', countryId: 'desert', name: "Key Matrix", cipherType: 'hill', plaintext: "THE KEY MATRIX MUST BE INVERTIBLE", ciphertext: encrypt("THE KEY MATRIX MUST BE INVERTIBLE", 'hill', { matrix: [[7, 18], [11, 23]] }), hint: "Matrix: [[7,18],[11,23]]", difficulty: 'Hard', params: { matrix: [[7, 18], [11, 23]] } },
+  { id: 'h17', countryId: 'desert', name: "Invertible", cipherType: 'hill', plaintext: "AN INVERTIBLE MATRIX HAS A NON ZERO DETERMINANT", ciphertext: encrypt("AN INVERTIBLE MATRIX HAS A NON ZERO DETERMINANT", 'hill', { matrix: [[9, 20], [13, 25]] }), hint: "Matrix: [[9,20],[13,25]]", difficulty: 'Hard', params: { matrix: [[9, 20], [13, 25]] } },
+  { id: 'h18', countryId: 'desert', name: "Calculation", cipherType: 'hill', plaintext: "PRECISION IN CALCULATION IS VITAL", ciphertext: encrypt("PRECISION IN CALCULATION IS VITAL", 'hill', { matrix: [[1, 10], [1, 11]] }), hint: "Matrix: [[1,10],[1,11]]", difficulty: 'Hard', params: { matrix: [[1, 10], [1, 11]] } },
+  { id: 'h19', countryId: 'desert', name: "Victory", cipherType: 'hill', plaintext: "VICTORY BELONGS TO THE MOST PERSEVERING", ciphertext: encrypt("VICTORY BELONGS TO THE MOST PERSEVERING", 'hill', { matrix: [[3, 14], [5, 19]] }), hint: "Matrix: [[3,14],[5,19]]", difficulty: 'Hard', params: { matrix: [[3, 14], [5, 19]] } },
+  { id: 'h20', countryId: 'desert', name: "Mastery", cipherType: 'hill', plaintext: "YOU HAVE MASTERED THE HILL CIPHER", ciphertext: encrypt("YOU HAVE MASTERED THE HILL CIPHER", 'hill', { matrix: [[5, 16], [7, 21]] }), hint: "Matrix: [[5,16],[7,21]]", difficulty: 'Hard', params: { matrix: [[5, 16], [7, 21]] } },
+
+  // ENIGMA (e1-e20)
+  { id: 'e1', countryId: 'tech', name: "Enigma Tutorial", cipherType: 'enigma', plaintext: "THE ENIGMA MACHINE IS A LEGENDARY CIPHER", ciphertext: encrypt("THE ENIGMA MACHINE IS A LEGENDARY CIPHER", 'enigma', { rotors: ['I', 'II', 'III'], positions: [0, 0, 0], plugboard: {} }), hint: "Rotors: I, II, III. Start: AAA. No plugs.", difficulty: 'Hard', params: { rotors: ['I', 'II', 'III'], positions: [0, 0, 0], plugboard: {} }, isTutorial: true },
+  { id: 'e2', countryId: 'tech', name: "Bletchley Park", cipherType: 'enigma', plaintext: "ALAN TURING BROKE THE ENIGMA CODE", ciphertext: encrypt("ALAN TURING BROKE THE ENIGMA CODE", 'enigma', { rotors: ['II', 'III', 'I'], positions: [5, 10, 15], plugboard: {} }), hint: "Rotors: II, III, I. Start: FKP. No plugs.", difficulty: 'Hard', params: { rotors: ['II', 'III', 'I'], positions: [5, 10, 15], plugboard: {} } },
+  { id: 'e3', countryId: 'tech', name: "Plugboard Power", cipherType: 'enigma', plaintext: "THE PLUGBOARD ADDS EXTRA SECURITY", ciphertext: encrypt("THE PLUGBOARD ADDS EXTRA SECURITY", 'enigma', { rotors: ['I', 'II', 'III'], positions: [0, 0, 0], plugboard: { 'A': 'Z', 'Z': 'A', 'B': 'Y', 'Y': 'B' } }), hint: "Rotors: I, II, III. Start: AAA. Plugs: A-Z, B-Y.", difficulty: 'Hard', params: { rotors: ['I', 'II', 'III'], positions: [0, 0, 0], plugboard: { 'A': 'Z', 'Z': 'A', 'B': 'Y', 'Y': 'B' } } },
+  { id: 'e4', countryId: 'tech', name: "Rotor Shift", cipherType: 'enigma', plaintext: "ROTORS STEP WITH EVERY KEYPRESS", ciphertext: encrypt("ROTORS STEP WITH EVERY KEYPRESS", 'enigma', { rotors: ['III', 'I', 'II'], positions: [1, 2, 3], plugboard: {} }), hint: "Rotors: III, I, II. Start: BCD.", difficulty: 'Hard', params: { rotors: ['III', 'I', 'II'], positions: [1, 2, 3], plugboard: {} } },
+  { id: 'e5', countryId: 'tech', name: "Reflector B", cipherType: 'enigma', plaintext: "THE REFLECTOR MAKES ENIGMA SYMMETRIC", ciphertext: encrypt("THE REFLECTOR MAKES ENIGMA SYMMETRIC", 'enigma', { rotors: ['IV', 'V', 'I'], positions: [0, 0, 0], plugboard: {} }), hint: "Rotors: IV, V, I. Start: AAA.", difficulty: 'Hard', params: { rotors: ['IV', 'V', 'I'], positions: [0, 0, 0], plugboard: {} } },
+  { id: 'e6', countryId: 'tech', name: "Secret Signal", cipherType: 'enigma', plaintext: "A SECRET SIGNAL HAS BEEN INTERCEPTED", ciphertext: encrypt("A SECRET SIGNAL HAS BEEN INTERCEPTED", 'enigma', { rotors: ['I', 'III', 'V'], positions: [10, 20, 5], plugboard: { 'C': 'D', 'D': 'C' } }), hint: "Rotors: I, III, V. Start: KUF. Plugs: C-D.", difficulty: 'Hard', params: { rotors: ['I', 'III', 'V'], positions: [10, 20, 5], plugboard: { 'C': 'D', 'D': 'C' } } },
+  { id: 'e7', countryId: 'tech', name: "Midnight Code", cipherType: 'enigma', plaintext: "THE ATTACK BEGINS AT MIDNIGHT", ciphertext: encrypt("THE ATTACK BEGINS AT MIDNIGHT", 'enigma', { rotors: ['II', 'IV', 'I'], positions: [0, 12, 0], plugboard: { 'M': 'N', 'N': 'M' } }), hint: "Rotors: II, IV, I. Start: AMA. Plugs: M-N.", difficulty: 'Hard', params: { rotors: ['II', 'IV', 'I'], positions: [0, 12, 0], plugboard: { 'M': 'N', 'N': 'M' } } },
+  { id: 'e8', countryId: 'tech', name: "Naval Enigma", cipherType: 'enigma', plaintext: "UBOATS ARE PATROLLING THE ATLANTIC", ciphertext: encrypt("UBOATS ARE PATROLLING THE ATLANTIC", 'enigma', { rotors: ['V', 'IV', 'III'], positions: [7, 7, 7], plugboard: {} }), hint: "Rotors: V, IV, III. Start: HHH.", difficulty: 'Hard', params: { rotors: ['V', 'IV', 'III'], positions: [7, 7, 7], plugboard: {} } },
+  { id: 'e9', countryId: 'tech', name: "Cipher Lord", cipherType: 'enigma', plaintext: "ONLY A TRUE CIPHER LORD CAN CRACK THIS", ciphertext: encrypt("ONLY A TRUE CIPHER LORD CAN CRACK THIS", 'enigma', { rotors: ['I', 'II', 'III'], positions: [13, 13, 13], plugboard: { 'X': 'Y', 'Y': 'X', 'P': 'Q', 'Q': 'P' } }), hint: "Rotors: I, II, III. Start: NNN. Plugs: X-Y, P-Q.", difficulty: 'Hard', params: { rotors: ['I', 'II', 'III'], positions: [13, 13, 13], plugboard: { 'X': 'Y', 'Y': 'X', 'P': 'Q', 'Q': 'P' } } },
+  { id: 'e10', countryId: 'tech', name: "Final Enigma", cipherType: 'enigma', plaintext: "CONGRATULATIONS ON MASTERING THE ENIGMA", ciphertext: encrypt("CONGRATULATIONS ON MASTERING THE ENIGMA", 'enigma', { rotors: ['V', 'I', 'II'], positions: [25, 25, 25], plugboard: { 'A': 'B', 'B': 'A', 'C': 'D', 'D': 'C', 'E': 'F', 'F': 'E' } }), hint: "Rotors: V, I, II. Start: ZZZ. Plugs: A-B, C-D, E-F.", difficulty: 'Hard', params: { rotors: ['V', 'I', 'II'], positions: [25, 25, 25], plugboard: { 'A': 'B', 'B': 'A', 'C': 'D', 'D': 'C', 'E': 'F', 'F': 'E' } } },
+
+  // FOREST LEVELS (Sylvaris)
+  { id: 'f-s1', countryId: 'forest', name: "Whispering Leaves", cipherType: 'caesar', plaintext: "THE FOREST HAS EYES", ciphertext: encrypt("THE FOREST HAS EYES", 'caesar', { shift: 5 }), hint: "Shift of 5.", difficulty: 'Easy', params: { shift: 5 } },
+  { id: 'f-s2', countryId: 'forest', name: "Bioluminescent Glow", cipherType: 'atbash', plaintext: "FOLLOW THE LIGHT", ciphertext: encrypt("FOLLOW THE LIGHT", 'atbash'), hint: "Atbash mirror.", difficulty: 'Easy' },
+  
+  // VOLCANO LEVELS (Volcania)
+  { id: 'v-v1', countryId: 'volcano', name: "Molten Core", cipherType: 'affine', plaintext: "THE HEAT IS RISING", ciphertext: encrypt("THE HEAT IS RISING", 'affine', { a: 5, b: 7 }), hint: "a=5, b=7", difficulty: 'Medium', params: { a: 5, b: 7 } },
+  { id: 'v-v2', countryId: 'volcano', name: "Magma Flow", cipherType: 'hill', plaintext: "DANGER BELOW", ciphertext: encrypt("DANGER BELOW", 'hill', { matrix: [[3, 2], [5, 7]] }), hint: "Matrix: [[3,2],[5,7]]", difficulty: 'Hard', params: { matrix: [[3, 2], [5, 7]] } },
+
+  // INDUSTRIAL LEVELS (Ironhold)
+  { id: 'i-i1', countryId: 'industrial', name: "Steam Pressure", cipherType: 'railfence', plaintext: "RELEASE THE STEAM", ciphertext: encrypt("RELEASE THE STEAM", 'railfence', { rails: 3 }), hint: "3 rails.", difficulty: 'Medium', params: { rails: 3 } },
+  { id: 'i-i2', countryId: 'industrial', name: "Steel Gears", cipherType: 'columnar', plaintext: "THE GEARS ARE TURNING", ciphertext: encrypt("THE GEARS ARE TURNING", 'columnar', { key: "IRON" }), hint: "Key: IRON", difficulty: 'Hard', params: { key: "IRON" } },
+
+  // OCEAN LEVELS (Oceana)
+  { id: 'o-o1', countryId: 'ocean', name: "Abyssal Current", cipherType: 'vigenere', plaintext: "DEEP IN THE OCEAN", ciphertext: encrypt("DEEP IN THE OCEAN", 'vigenere', { key: "WAVE" }), hint: "Key: WAVE", difficulty: 'Medium', params: { key: "WAVE" } },
+  { id: 'o-o2', countryId: 'ocean', name: "Tidal Force", cipherType: 'beaufort', plaintext: "THE TIDE IS COMING", ciphertext: encrypt("THE TIDE IS COMING", 'beaufort', { key: "MOON" }), hint: "Key: MOON", difficulty: 'Hard', params: { key: "MOON" } },
+
+  // ADDITIONAL FOREST LEVELS
+  { id: 'forest-3', countryId: 'forest', name: "Whispering Leaves", cipherType: 'vigenere', plaintext: "THE TREES HAVE WHISPERS", ciphertext: encrypt("THE TREES HAVE WHISPERS", 'vigenere', { key: "LEAF" }), hint: "Key: LEAF", difficulty: 'Medium', params: { key: "LEAF" } },
+  { id: 'forest-4', countryId: 'forest', name: "Natures Code", cipherType: 'railfence', plaintext: "NATURES CODE IS ORGANIC", ciphertext: encrypt("NATURES CODE IS ORGANIC", 'railfence', { rails: 3 }), hint: "3 rails zigzag.", difficulty: 'Medium', params: { rails: 3 } },
+  { id: 'forest-5', countryId: 'forest', name: "Bioluminescence", cipherType: 'polybius', plaintext: "BIOLUMINESCENCE", ciphertext: encrypt("BIOLUMINESCENCE", 'polybius'), hint: "Row then Column.", difficulty: 'Medium' },
+  { id: 'forest-6', countryId: 'forest', name: "Root System", cipherType: 'monoalphabetic', plaintext: "THE ROOTS RUN DEEP", ciphertext: encrypt("THE ROOTS RUN DEEP", 'monoalphabetic', { alphabet: "QWERTYUIOPASDFGHJKLZXCVBNM" }), hint: "Substitution cipher.", difficulty: 'Hard', params: { alphabet: "QWERTYUIOPASDFGHJKLZXCVBNM" } },
+  { id: 'forest-7', countryId: 'forest', name: "Ancient Grove", cipherType: 'caesar', plaintext: "ANCIENT GROVE", ciphertext: encrypt("ANCIENT GROVE", 'caesar', { shift: 8 }), hint: "Shift of 8.", difficulty: 'Easy', params: { shift: 8 } },
+  { id: 'forest-8', countryId: 'forest', name: "Woodland Spirits", cipherType: 'atbash', plaintext: "WOODLAND SPIRITS", ciphertext: encrypt("WOODLAND SPIRITS", 'atbash'), hint: "Atbash mirror.", difficulty: 'Easy' },
+  { id: 'forest-9', countryId: 'forest', name: "Canopy Secrets", cipherType: 'vigenere', plaintext: "THE CANOPY HIDES SECRETS", ciphertext: encrypt("THE CANOPY HIDES SECRETS", 'vigenere', { key: "TREE" }), hint: "Key: TREE", difficulty: 'Medium', params: { key: "TREE" } },
+  { id: 'forest-10', countryId: 'forest', name: "Mossy Stones", cipherType: 'railfence', plaintext: "MOSS COVERED STONES", ciphertext: encrypt("MOSS COVERED STONES", 'railfence', { rails: 2 }), hint: "2 rails.", difficulty: 'Easy', params: { rails: 2 } },
+  { id: 'forest-11', countryId: 'forest', name: "Fern Fronds", cipherType: 'polybius', plaintext: "FERN FRONDS", ciphertext: encrypt("FERN FRONDS", 'polybius'), hint: "Grid coordinates.", difficulty: 'Medium' },
+  { id: 'forest-12', countryId: 'forest', name: "Wildlife", cipherType: 'monoalphabetic', plaintext: "WILDLIFE ABOUNDS", ciphertext: encrypt("WILDLIFE ABOUNDS", 'monoalphabetic', { alphabet: "MNBVCXZLKJHGFDSAPOIUYTREWQ" }), hint: "Shuffled alphabet.", difficulty: 'Hard', params: { alphabet: "MNBVCXZLKJHGFDSAPOIUYTREWQ" } },
+  { id: 'forest-13', countryId: 'forest', name: "River Flow", cipherType: 'caesar', plaintext: "RIVER FLOWS THROUGH", ciphertext: encrypt("RIVER FLOWS THROUGH", 'caesar', { shift: 12 }), hint: "Shift of 12.", difficulty: 'Medium', params: { shift: 12 } },
+  { id: 'forest-14', countryId: 'forest', name: "Night Watch", cipherType: 'atbash', plaintext: "NIGHT OWL WATCHES", ciphertext: encrypt("NIGHT OWL WATCHES", 'atbash'), hint: "Opposite letters.", difficulty: 'Easy' },
+  { id: 'forest-15', countryId: 'forest', name: "Night Bloom", cipherType: 'vigenere', plaintext: "FLOWER BLOOMS AT NIGHT", ciphertext: encrypt("FLOWER BLOOMS AT NIGHT", 'vigenere', { key: "SEED" }), hint: "Key: SEED", difficulty: 'Medium', params: { key: "SEED" } },
+  { id: 'forest-16', countryId: 'forest', name: "Undergrowth", cipherType: 'railfence', plaintext: "THICK UNDERGROWTH", ciphertext: encrypt("THICK UNDERGROWTH", 'railfence', { rails: 3 }), hint: "3 rails.", difficulty: 'Medium', params: { rails: 3 } },
+  { id: 'forest-17', countryId: 'forest', name: "Mystic Fungi", cipherType: 'polybius', plaintext: "MYSTIC MUSHROOMS", ciphertext: encrypt("MYSTIC MUSHROOMS", 'polybius'), hint: "5x5 square.", difficulty: 'Medium' },
+  { id: 'forest-18', countryId: 'forest', name: "Enchanted", cipherType: 'monoalphabetic', plaintext: "ENCHANTED FOREST", ciphertext: encrypt("ENCHANTED FOREST", 'monoalphabetic', { alphabet: "PLMOKNIJBUHGYTFCVDRXESZAWQ" }), hint: "Random mapping.", difficulty: 'Hard', params: { alphabet: "PLMOKNIJBUHGYTFCVDRXESZAWQ" } },
+  { id: 'forest-19', countryId: 'forest', name: "Woods Guardian", cipherType: 'caesar', plaintext: "GUARDIAN OF THE WOODS", ciphertext: encrypt("GUARDIAN OF THE WOODS", 'caesar', { shift: 3 }), hint: "Shift of 3.", difficulty: 'Easy', params: { shift: 3 } },
+  { id: 'forest-20', countryId: 'forest', name: "Forest Master", cipherType: 'atbash', plaintext: "YOU HAVE MASTERED THE FOREST", ciphertext: encrypt("YOU HAVE MASTERED THE FOREST", 'atbash'), hint: "Atbash final.", difficulty: 'Medium' },
+  { id: 'forest-21', countryId: 'forest', name: "Deep Roots", cipherType: 'vigenere', plaintext: "THE ROOTS CONNECT US ALL", ciphertext: encrypt("THE ROOTS CONNECT US ALL", 'vigenere', { key: "ROOT" }), hint: "Key: ROOT", difficulty: 'Medium', params: { key: "ROOT" } },
+  { id: 'forest-22', countryId: 'forest', name: "Canopy Shadow", cipherType: 'railfence', plaintext: "SHADOWS IN THE CANOPY", ciphertext: encrypt("SHADOWS IN THE CANOPY", 'railfence', { rails: 3 }), hint: "3 rails.", difficulty: 'Medium', params: { rails: 3 } },
+  { id: 'forest-23', countryId: 'forest', name: "Nature Spirit", cipherType: 'polybius', plaintext: "SPIRIT OF NATURE", ciphertext: encrypt("SPIRIT OF NATURE", 'polybius'), hint: "Grid coords.", difficulty: 'Medium' },
+  { id: 'forest-24', countryId: 'forest', name: "Green Haven", cipherType: 'caesar', plaintext: "GREEN HAVEN SECURE", ciphertext: encrypt("GREEN HAVEN SECURE", 'caesar', { shift: 7 }), hint: "Shift of 7.", difficulty: 'Easy', params: { shift: 7 } },
+  { id: 'forest-25', countryId: 'forest', name: "Sylvaris Final", cipherType: 'atbash', plaintext: "SYLVARIS IS PROTECTED", ciphertext: encrypt("SYLVARIS IS PROTECTED", 'atbash'), hint: "Atbash mirror.", difficulty: 'Medium' },
+  { id: 'forest-26', countryId: 'forest', name: "Forest Spirits", cipherType: 'playfair', plaintext: "FOREST SPIRITS PROTECT US", ciphertext: encrypt("FOREST SPIRITS PROTECT US", 'playfair', { key: "SPIRIT" }), hint: "Key: SPIRIT", difficulty: 'Hard', params: { key: "SPIRIT" } },
+  { id: 'forest-27', countryId: 'forest', name: "Ancient Wisdom", cipherType: 'affine', plaintext: "ANCIENT WISDOM", ciphertext: encrypt("ANCIENT WISDOM", 'affine', { a: 5, b: 8 }), hint: "a=5, b=8", difficulty: 'Medium', params: { a: 5, b: 8 } },
+  { id: 'forest-28', countryId: 'forest', name: "Bioluminescent Path", cipherType: 'beaufort', plaintext: "BIOLUMINESCENT PATH", ciphertext: encrypt("BIOLUMINESCENT PATH", 'beaufort', { key: "GLOW" }), hint: "Key: GLOW", difficulty: 'Hard', params: { key: "GLOW" } },
+  { id: 'forest-29', countryId: 'forest', name: "Hidden Sanctuary", cipherType: 'columnar', plaintext: "HIDDEN SANCTUARY", ciphertext: encrypt("HIDDEN SANCTUARY", 'columnar', { key: "SAFE" }), hint: "Key: SAFE", difficulty: 'Hard', params: { key: "SAFE" } },
+  { id: 'forest-30', countryId: 'forest', name: "Sylvaris Eternal", cipherType: 'hill', plaintext: "SYLVARIS ETERNAL", ciphertext: encrypt("SYLVARIS ETERNAL", 'hill', { matrix: [[5, 2], [7, 3]] }), hint: "Matrix: [[5,2],[7,3]]", difficulty: 'Hard', params: { matrix: [[5, 2], [7, 3]] } },
+
+  // ADDITIONAL VOLCANO LEVELS
+  { id: 'volcano-3', countryId: 'volcano', name: "Unstable Core", cipherType: 'columnar', plaintext: "THE CORE IS UNSTABLE", ciphertext: encrypt("THE CORE IS UNSTABLE", 'columnar', { key: "LAVA" }), hint: "Key: LAVA", difficulty: 'Hard', params: { key: "LAVA" } },
+  { id: 'volcano-4', countryId: 'volcano', name: "Molten Rivers", cipherType: 'beaufort', plaintext: "MOLTEN RIVERS FLOW", ciphertext: encrypt("MOLTEN RIVERS FLOW", 'beaufort', { key: "HEAT" }), hint: "Key: HEAT", difficulty: 'Hard', params: { key: "HEAT" } },
+  { id: 'volcano-5', countryId: 'volcano', name: "Ash Clouds", cipherType: 'caesar', plaintext: "ASH CLOUDS RISING", ciphertext: encrypt("ASH CLOUDS RISING", 'caesar', { shift: 10 }), hint: "Shift of 10.", difficulty: 'Medium', params: { shift: 10 } },
+  { id: 'volcano-6', countryId: 'volcano', name: "Obsidian", cipherType: 'atbash', plaintext: "OBSIDIAN BLADE", ciphertext: encrypt("OBSIDIAN BLADE", 'atbash'), hint: "Mirror cipher.", difficulty: 'Easy' },
+  { id: 'volcano-7', countryId: 'volcano', name: "Geothermal", cipherType: 'affine', plaintext: "GEOTHERMAL POWER", ciphertext: encrypt("GEOTHERMAL POWER", 'affine', { a: 3, b: 5 }), hint: "a=3, b=5", difficulty: 'Medium', params: { a: 3, b: 5 } },
+  { id: 'volcano-8', countryId: 'volcano', name: "Tectonic", cipherType: 'hill', plaintext: "TECTONIC SHIFT", ciphertext: encrypt("TECTONIC SHIFT", 'hill', { matrix: [[1, 2], [3, 5]] }), hint: "Matrix: [[1,2],[3,5]]", difficulty: 'Hard', params: { matrix: [[1, 2], [3, 5]] } },
+  { id: 'volcano-9', countryId: 'volcano', name: "Sulphur Springs", cipherType: 'columnar', plaintext: "SULPHUR SPRINGS", ciphertext: encrypt("SULPHUR SPRINGS", 'columnar', { key: "FIRE" }), hint: "Key: FIRE", difficulty: 'Hard', params: { key: "FIRE" } },
+  { id: 'volcano-10', countryId: 'volcano', name: "Eruption", cipherType: 'beaufort', plaintext: "VOLCANIC ERUPTION", ciphertext: encrypt("VOLCANIC ERUPTION", 'beaufort', { key: "MAGMA" }), hint: "Key: MAGMA", difficulty: 'Hard', params: { key: "MAGMA" } },
+  { id: 'volcano-11', countryId: 'volcano', name: "Pumice", cipherType: 'caesar', plaintext: "PUMICE STONE", ciphertext: encrypt("PUMICE STONE", 'caesar', { shift: 4 }), hint: "Shift of 4.", difficulty: 'Easy', params: { shift: 4 } },
+  { id: 'volcano-12', countryId: 'volcano', name: "Basalt", cipherType: 'atbash', plaintext: "BASALT COLUMNS", ciphertext: encrypt("BASALT COLUMNS", 'atbash'), hint: "Atbash mapping.", difficulty: 'Easy' },
+  { id: 'volcano-13', countryId: 'volcano', name: "Thermal Vent", cipherType: 'affine', plaintext: "THERMAL VENT", ciphertext: encrypt("THERMAL VENT", 'affine', { a: 7, b: 2 }), hint: "a=7, b=2", difficulty: 'Medium', params: { a: 7, b: 2 } },
+  { id: 'volcano-14', countryId: 'volcano', name: "Earthquake", cipherType: 'hill', plaintext: "EARTHQUAKE ALERT", ciphertext: encrypt("EARTHQUAKE ALERT", 'hill', { matrix: [[3, 2], [5, 7]] }), hint: "Matrix: [[3,2],[5,7]]", difficulty: 'Hard', params: { matrix: [[3, 2], [5, 7]] } },
+  { id: 'volcano-15', countryId: 'volcano', name: "Crater Lake", cipherType: 'columnar', plaintext: "CRATER LAKE", ciphertext: encrypt("CRATER LAKE", 'columnar', { key: "DEEP" }), hint: "Key: DEEP", difficulty: 'Hard', params: { key: "DEEP" } },
+  { id: 'volcano-16', countryId: 'volcano', name: "Pyroclastic", cipherType: 'beaufort', plaintext: "PYROCLASTIC FLOW", ciphertext: encrypt("PYROCLASTIC FLOW", 'beaufort', { key: "FAST" }), hint: "Key: FAST", difficulty: 'Hard', params: { key: "FAST" } },
+  { id: 'volcano-17', countryId: 'volcano', name: "Magma Chamber", cipherType: 'caesar', plaintext: "MAGMA CHAMBER", ciphertext: encrypt("MAGMA CHAMBER", 'caesar', { shift: 15 }), hint: "Shift of 15.", difficulty: 'Medium', params: { shift: 15 } },
+  { id: 'volcano-18', countryId: 'volcano', name: "Scorched", cipherType: 'atbash', plaintext: "SCORCHED EARTH", ciphertext: encrypt("SCORCHED EARTH", 'atbash'), hint: "Reverse alphabet.", difficulty: 'Medium' },
+  { id: 'volcano-19', countryId: 'volcano', name: "Inner Core", cipherType: 'affine', plaintext: "INNER CORE", ciphertext: encrypt("INNER CORE", 'affine', { a: 11, b: 9 }), hint: "a=11, b=9", difficulty: 'Medium', params: { a: 11, b: 9 } },
+  { id: 'volcano-20', countryId: 'volcano', name: "Volcano Master", cipherType: 'hill', plaintext: "YOU HAVE MASTERED THE VOLCANO", ciphertext: encrypt("YOU HAVE MASTERED THE VOLCANO", 'hill', { matrix: [[1, 2], [3, 5]] }), hint: "Final Hill.", difficulty: 'Hard', params: { matrix: [[1, 2], [3, 5]] } },
+  { id: 'volcano-21', countryId: 'volcano', name: "Lava Lake", cipherType: 'columnar', plaintext: "LAVA LAKE BUBBLING", ciphertext: encrypt("LAVA LAKE BUBBLING", 'columnar', { key: "LAVA" }), hint: "Key: LAVA", difficulty: 'Hard', params: { key: "LAVA" } },
+  { id: 'volcano-22', countryId: 'volcano', name: "Tectonic Plate", cipherType: 'beaufort', plaintext: "TECTONIC PLATES SHIFT", ciphertext: encrypt("TECTONIC PLATES SHIFT", 'beaufort', { key: "PLATE" }), hint: "Key: PLATE", difficulty: 'Hard', params: { key: "PLATE" } },
+  { id: 'volcano-23', countryId: 'volcano', name: "Geothermal Vent", cipherType: 'caesar', plaintext: "GEOTHERMAL VENT OPEN", ciphertext: encrypt("GEOTHERMAL VENT OPEN", 'caesar', { shift: 12 }), hint: "Shift of 12.", difficulty: 'Medium', params: { shift: 12 } },
+  { id: 'volcano-24', countryId: 'volcano', name: "Obsidian Shard", cipherType: 'atbash', plaintext: "OBSIDIAN SHARD FOUND", ciphertext: encrypt("OBSIDIAN SHARD FOUND", 'atbash'), hint: "Atbash mirror.", difficulty: 'Easy' },
+  { id: 'volcano-25', countryId: 'volcano', name: "Volcania Final", cipherType: 'affine', plaintext: "VOLCANIA IS SECURE", ciphertext: encrypt("VOLCANIA IS SECURE", 'affine', { a: 3, b: 11 }), hint: "a=3, b=11", difficulty: 'Medium', params: { a: 3, b: 11 } },
+  { id: 'volcano-26', countryId: 'volcano', name: "Magma Chamber", cipherType: 'vigenere', plaintext: "MAGMA CHAMBER SEALED", ciphertext: encrypt("MAGMA CHAMBER SEALED", 'vigenere', { key: "CORE" }), hint: "Key: CORE", difficulty: 'Medium', params: { key: "CORE" } },
+  { id: 'volcano-27', countryId: 'volcano', name: "Tectonic Activity", cipherType: 'polybius', plaintext: "TECTONIC ACTIVITY", ciphertext: encrypt("TECTONIC ACTIVITY", 'polybius'), hint: "Grid coords.", difficulty: 'Medium' },
+  { id: 'volcano-28', countryId: 'volcano', name: "Ash Fall", cipherType: 'railfence', plaintext: "VOLCANIC ASH FALLING", ciphertext: encrypt("VOLCANIC ASH FALLING", 'railfence', { rails: 4 }), hint: "4 rails.", difficulty: 'Hard', params: { rails: 4 } },
+  { id: 'volcano-29', countryId: 'volcano', name: "Molten Rivers", cipherType: 'monoalphabetic', plaintext: "MOLTEN RIVERS", ciphertext: encrypt("MOLTEN RIVERS", 'monoalphabetic', { alphabet: "ZYXWVUTSRQPONMLKJIHGFEDCBA" }), hint: "Reverse alphabet substitution.", difficulty: 'Hard', params: { alphabet: "ZYXWVUTSRQPONMLKJIHGFEDCBA" } },
+  { id: 'volcano-30', countryId: 'volcano', name: "Volcania Core", cipherType: 'enigma', plaintext: "VOLCANIA CORE ACCESS", ciphertext: encrypt("VOLCANIA CORE ACCESS", 'enigma', { rotors: ['I', 'II', 'III'], positions: [5, 5, 5], plugboard: {} }), hint: "Rotors: I, II, III. Start: FFF.", difficulty: 'Hard', params: { rotors: ['I', 'II', 'III'], positions: [5, 5, 5], plugboard: {} } },
+
+  // ADDITIONAL INDUSTRIAL LEVELS
+  { id: 'industrial-3', countryId: 'industrial', name: "Steam Engine", cipherType: 'polybius', plaintext: "STEAM ENGINE", ciphertext: encrypt("STEAM ENGINE", 'polybius'), hint: "Grid coords.", difficulty: 'Medium' },
+  { id: 'industrial-4', countryId: 'industrial', name: "Iron and Steel", cipherType: 'affine', plaintext: "IRON AND STEEL", ciphertext: encrypt("IRON AND STEEL", 'affine', { a: 5, b: 3 }), hint: "a=5, b=3", difficulty: 'Medium', params: { a: 5, b: 3 } },
+  { id: 'industrial-5', countryId: 'industrial', name: "Factory Smoke", cipherType: 'vigenere', plaintext: "FACTORY SMOKE", ciphertext: encrypt("FACTORY SMOKE", 'vigenere', { key: "COAL" }), hint: "Key: COAL", difficulty: 'Medium', params: { key: "COAL" } },
+  { id: 'industrial-6', countryId: 'industrial', name: "Gear Ratio", cipherType: 'caesar', plaintext: "GEAR RATIO", ciphertext: encrypt("GEAR RATIO", 'caesar', { shift: 6 }), hint: "Shift of 6.", difficulty: 'Easy', params: { shift: 6 } },
+  { id: 'industrial-7', countryId: 'industrial', name: "Assembly Line", cipherType: 'railfence', plaintext: "ASSEMBLY LINE", ciphertext: encrypt("ASSEMBLY LINE", 'railfence', { rails: 3 }), hint: "3 rails.", difficulty: 'Medium', params: { rails: 3 } },
+  { id: 'industrial-8', countryId: 'industrial', name: "Production", cipherType: 'columnar', plaintext: "PRODUCTION QUOTA", ciphertext: encrypt("PRODUCTION QUOTA", 'columnar', { key: "WORK" }), hint: "Key: WORK", difficulty: 'Hard', params: { key: "WORK" } },
+  { id: 'industrial-9', countryId: 'industrial', name: "Mechanical Arm", cipherType: 'polybius', plaintext: "MECHANICAL ARM", ciphertext: encrypt("MECHANICAL ARM", 'polybius'), hint: "5x5 square.", difficulty: 'Medium' },
+  { id: 'industrial-10', countryId: 'industrial', name: "Hydraulic Press", cipherType: 'affine', plaintext: "HYDRAULIC PRESS", ciphertext: encrypt("HYDRAULIC PRESS", 'affine', { a: 9, b: 1 }), hint: "a=9, b=1", difficulty: 'Medium', params: { a: 9, b: 1 } },
+  { id: 'industrial-11', countryId: 'industrial', name: "Conveyor Belt", cipherType: 'vigenere', plaintext: "CONVEYOR BELT", ciphertext: encrypt("CONVEYOR BELT", 'vigenere', { key: "MOVE" }), hint: "Key: MOVE", difficulty: 'Medium', params: { key: "MOVE" } },
+  { id: 'industrial-12', countryId: 'industrial', name: "Wrench and Hammer", cipherType: 'caesar', plaintext: "WRENCH AND HAMMER", ciphertext: encrypt("WRENCH AND HAMMER", 'caesar', { shift: 11 }), hint: "Shift of 11.", difficulty: 'Medium', params: { shift: 11 } },
+  { id: 'industrial-13', countryId: 'industrial', name: "Steam Turbine", cipherType: 'railfence', plaintext: "STEAM TURBINE", ciphertext: encrypt("STEAM TURBINE", 'railfence', { rails: 2 }), hint: "2 rails.", difficulty: 'Medium', params: { rails: 2 } },
+  { id: 'industrial-14', countryId: 'industrial', name: "Boiler Room", cipherType: 'columnar', plaintext: "BOILER ROOM", ciphertext: encrypt("BOILER ROOM", 'columnar', { key: "HOT" }), hint: "Key: HOT", difficulty: 'Hard', params: { key: "HOT" } },
+  { id: 'industrial-15', countryId: 'industrial', name: "Piston Stroke", cipherType: 'polybius', plaintext: "PISTON STROKE", ciphertext: encrypt("PISTON STROKE", 'polybius'), hint: "Grid coords.", difficulty: 'Medium' },
+  { id: 'industrial-16', countryId: 'industrial', name: "Forging", cipherType: 'affine', plaintext: "FORGING PROCESS", ciphertext: encrypt("FORGING PROCESS", 'affine', { a: 15, b: 4 }), hint: "a=15, b=4", difficulty: 'Medium', params: { a: 15, b: 4 } },
+  { id: 'industrial-17', countryId: 'industrial', name: "Revolution", cipherType: 'vigenere', plaintext: "INDUSTRIAL REVOLUTION", ciphertext: encrypt("INDUSTRIAL REVOLUTION", 'vigenere', { key: "IRON" }), hint: "Key: IRON", difficulty: 'Medium', params: { key: "IRON" } },
+  { id: 'industrial-18', countryId: 'industrial', name: "Clockwork", cipherType: 'caesar', plaintext: "CLOCKWORK PRECISION", ciphertext: encrypt("CLOCKWORK PRECISION", 'caesar', { shift: 20 }), hint: "Shift of 20.", difficulty: 'Hard', params: { shift: 20 } },
+  { id: 'industrial-19', countryId: 'industrial', name: "Metal Fatigue", cipherType: 'railfence', plaintext: "METAL FATIGUE", ciphertext: encrypt("METAL FATIGUE", 'railfence', { rails: 4 }), hint: "4 rails.", difficulty: 'Hard', params: { rails: 4 } },
+  { id: 'industrial-20', countryId: 'industrial', name: "Industrial Master", cipherType: 'columnar', plaintext: "YOU HAVE MASTERED THE INDUSTRY", ciphertext: encrypt("YOU HAVE MASTERED THE INDUSTRY", 'columnar', { key: "METAL" }), hint: "Final Columnar.", difficulty: 'Hard', params: { key: "METAL" } },
+  { id: 'industrial-21', countryId: 'industrial', name: "Steam Pipe", cipherType: 'polybius', plaintext: "STEAM PIPE LEAK", ciphertext: encrypt("STEAM PIPE LEAK", 'polybius'), hint: "Grid coords.", difficulty: 'Medium' },
+  { id: 'industrial-22', countryId: 'industrial', name: "Iron Ore", cipherType: 'affine', plaintext: "IRON ORE MINED", ciphertext: encrypt("IRON ORE MINED", 'affine', { a: 5, b: 2 }), hint: "a=5, b=2", difficulty: 'Medium', params: { a: 5, b: 2 } },
+  { id: 'industrial-23', countryId: 'industrial', name: "Factory Gate", cipherType: 'vigenere', plaintext: "FACTORY GATE CLOSED", ciphertext: encrypt("FACTORY GATE CLOSED", 'vigenere', { key: "GATE" }), hint: "Key: GATE", difficulty: 'Medium', params: { key: "GATE" } },
+  { id: 'industrial-24', countryId: 'industrial', name: "Steel Beam", cipherType: 'caesar', plaintext: "STEEL BEAM SECURE", ciphertext: encrypt("STEEL BEAM SECURE", 'caesar', { shift: 14 }), hint: "Shift of 14.", difficulty: 'Medium', params: { shift: 14 } },
+  { id: 'industrial-25', countryId: 'industrial', name: "Ironhold Final", cipherType: 'railfence', plaintext: "IRONHOLD IS STRONG", ciphertext: encrypt("IRONHOLD IS STRONG", 'railfence', { rails: 2 }), hint: "2 rails.", difficulty: 'Medium', params: { rails: 2 } },
+  { id: 'industrial-26', countryId: 'industrial', name: "Ironhold Production", cipherType: 'hill', plaintext: "IRONHOLD PRODUCTION", ciphertext: encrypt("IRONHOLD PRODUCTION", 'hill', { matrix: [[2, 1], [3, 4]] }), hint: "Matrix: [[2,1],[3,4]]", difficulty: 'Hard', params: { matrix: [[2, 1], [3, 4]] } },
+  { id: 'industrial-27', countryId: 'industrial', name: "Steam Pressure", cipherType: 'beaufort', plaintext: "STEAM PRESSURE HIGH", ciphertext: encrypt("STEAM PRESSURE HIGH", 'beaufort', { key: "STEAM" }), hint: "Key: STEAM", difficulty: 'Hard', params: { key: "STEAM" } },
+  { id: 'industrial-28', countryId: 'industrial', name: "Mechanical Efficiency", cipherType: 'atbash', plaintext: "MECHANICAL EFFICIENCY", ciphertext: encrypt("MECHANICAL EFFICIENCY", 'atbash'), hint: "Atbash mirror.", difficulty: 'Medium' },
+  { id: 'industrial-29', countryId: 'industrial', name: "Steel Foundry", cipherType: 'playfair', plaintext: "STEEL FOUNDRY", ciphertext: encrypt("STEEL FOUNDRY", 'playfair', { key: "STEEL" }), hint: "Key: STEEL", difficulty: 'Hard', params: { key: "STEEL" } },
+  { id: 'industrial-30', countryId: 'industrial', name: "Ironhold Override", cipherType: 'enigma', plaintext: "IRONHOLD OVERRIDE", ciphertext: encrypt("IRONHOLD OVERRIDE", 'enigma', { rotors: ['II', 'IV', 'V'], positions: [1, 1, 1], plugboard: {} }), hint: "Rotors: II, IV, V. Start: BBB.", difficulty: 'Hard', params: { rotors: ['II', 'IV', 'V'], positions: [1, 1, 1], plugboard: {} } },
+
+  // ADDITIONAL OCEAN LEVELS
+  { id: 'ocean-3', countryId: 'ocean', name: "Deep Sea", cipherType: 'railfence', plaintext: "DEEP SEA EXPLORATION", ciphertext: encrypt("DEEP SEA EXPLORATION", 'railfence', { rails: 3 }), hint: "3 rails.", difficulty: 'Medium', params: { rails: 3 } },
+  { id: 'ocean-4', countryId: 'ocean', name: "Submarine", cipherType: 'columnar', plaintext: "SUBMARINE MISSION", ciphertext: encrypt("SUBMARINE MISSION", 'columnar', { key: "DIVE" }), hint: "Key: DIVE", difficulty: 'Hard', params: { key: "DIVE" } },
+  { id: 'ocean-5', countryId: 'ocean', name: "Coral Reef", cipherType: 'hill', plaintext: "CORAL REEF PROTECTION", ciphertext: encrypt("CORAL REEF PROTECTION", 'hill', { matrix: [[3, 3], [2, 5]] }), hint: "Matrix: [[3,3],[2,5]]", difficulty: 'Hard', params: { matrix: [[3, 3], [2, 5]] } },
+  { id: 'ocean-6', countryId: 'ocean', name: "Abyssal Zone", cipherType: 'atbash', plaintext: "ABYSSAL ZONE", ciphertext: encrypt("ABYSSAL ZONE", 'atbash'), hint: "Atbash mirror.", difficulty: 'Easy' },
+  { id: 'ocean-7', countryId: 'ocean', name: "Maritime Trade", cipherType: 'vigenere', plaintext: "MARITIME TRADE", ciphertext: encrypt("MARITIME TRADE", 'vigenere', { key: "SHIP" }), hint: "Key: SHIP", difficulty: 'Medium', params: { key: "SHIP" } },
+  { id: 'ocean-8', countryId: 'ocean', name: "Tidal Wave", cipherType: 'beaufort', plaintext: "TIDAL WAVE WARNING", ciphertext: encrypt("TIDAL WAVE WARNING", 'beaufort', { key: "WAVE" }), hint: "Key: WAVE", difficulty: 'Hard', params: { key: "WAVE" } },
+  { id: 'ocean-9', countryId: 'ocean', name: "Underwater Cable", cipherType: 'railfence', plaintext: "UNDERWATER CABLE", ciphertext: encrypt("UNDERWATER CABLE", 'railfence', { rails: 2 }), hint: "2 rails.", difficulty: 'Medium', params: { rails: 2 } },
+  { id: 'ocean-10', countryId: 'ocean', name: "Sonar", cipherType: 'columnar', plaintext: "SONAR DETECTION", ciphertext: encrypt("SONAR DETECTION", 'columnar', { key: "PING" }), hint: "Key: PING", difficulty: 'Hard', params: { key: "PING" } },
+  { id: 'ocean-11', countryId: 'ocean', name: "Marine Biology", cipherType: 'hill', plaintext: "MARINE BIOLOGY", ciphertext: encrypt("MARINE BIOLOGY", 'hill', { matrix: [[5, 8], [17, 3]] }), hint: "Matrix: [[5,8],[17,3]]", difficulty: 'Hard', params: { matrix: [[5, 8], [17, 3]] } },
+  { id: 'ocean-12', countryId: 'ocean', name: "Trench Depth", cipherType: 'atbash', plaintext: "TRENCH DEPTH", ciphertext: encrypt("TRENCH DEPTH", 'atbash'), hint: "Atbash mapping.", difficulty: 'Medium' },
+  { id: 'ocean-13', countryId: 'ocean', name: "Oceanic Currents", cipherType: 'vigenere', plaintext: "OCEANIC CURRENTS", ciphertext: encrypt("OCEANIC CURRENTS", 'vigenere', { key: "FLOW" }), hint: "Key: FLOW", difficulty: 'Medium', params: { key: "FLOW" } },
+  { id: 'ocean-14', countryId: 'ocean', name: "Coastal Defense", cipherType: 'beaufort', plaintext: "COASTAL DEFENSE", ciphertext: encrypt("COASTAL DEFENSE", 'beaufort', { key: "WALL" }), hint: "Key: WALL", difficulty: 'Hard', params: { key: "WALL" } },
+  { id: 'ocean-15', countryId: 'ocean', name: "Shipwreck", cipherType: 'railfence', plaintext: "SHIPWRECK TREASURE", ciphertext: encrypt("SHIPWRECK TREASURE", 'railfence', { rails: 4 }), hint: "4 rails.", difficulty: 'Hard', params: { rails: 4 } },
+  { id: 'ocean-16', countryId: 'ocean', name: "Beacon", cipherType: 'columnar', plaintext: "LIGHTHOUSE BEACON", ciphertext: encrypt("LIGHTHOUSE BEACON", 'columnar', { key: "LAMP" }), hint: "Key: LAMP", difficulty: 'Hard', params: { key: "LAMP" } },
+  { id: 'ocean-17', countryId: 'ocean', name: "Aquatic Life", cipherType: 'hill', plaintext: "AQUATIC LIFE", ciphertext: encrypt("AQUATIC LIFE", 'hill', { matrix: [[7, 12], [11, 9]] }), hint: "Matrix: [[7,12],[11,9]]", difficulty: 'Hard', params: { matrix: [[7, 12], [11, 9]] } },
+  { id: 'ocean-18', countryId: 'ocean', name: "Salt Water", cipherType: 'atbash', plaintext: "SALT WATER", ciphertext: encrypt("SALT WATER", 'atbash'), hint: "Reverse alphabet.", difficulty: 'Easy' },
+  { id: 'ocean-19', countryId: 'ocean', name: "Whale Song", cipherType: 'vigenere', plaintext: "BLUE WHALE SONG", ciphertext: encrypt("BLUE WHALE SONG", 'vigenere', { key: "SING" }), hint: "Key: SING", difficulty: 'Medium', params: { key: "SING" } },
+  { id: 'ocean-20', countryId: 'ocean', name: "Ocean Master", cipherType: 'beaufort', plaintext: "YOU HAVE MASTERED THE OCEAN", ciphertext: encrypt("YOU HAVE MASTERED THE OCEAN", 'beaufort', { key: "WATER" }), hint: "Final Beaufort.", difficulty: 'Hard', params: { key: "WATER" } },
+  { id: 'ocean-21', countryId: 'ocean', name: "Abyssal Exploration", cipherType: 'polybius', plaintext: "ABYSSAL EXPLORATION", ciphertext: encrypt("ABYSSAL EXPLORATION", 'polybius'), hint: "Grid coords.", difficulty: 'Medium' },
+  { id: 'ocean-22', countryId: 'ocean', name: "Tidal Force", cipherType: 'affine', plaintext: "TIDAL FORCE", ciphertext: encrypt("TIDAL FORCE", 'affine', { a: 9, b: 7 }), hint: "a=9, b=7", difficulty: 'Medium', params: { a: 9, b: 7 } },
+  { id: 'ocean-23', countryId: 'ocean', name: "Coral Reef", cipherType: 'monoalphabetic', plaintext: "CORAL REEF", ciphertext: encrypt("CORAL REEF", 'monoalphabetic', { alphabet: "QAZWSXEDCRFVTGBYHNUJMIKOLP" }), hint: "Shuffled alphabet.", difficulty: 'Hard', params: { alphabet: "QAZWSXEDCRFVTGBYHNUJMIKOLP" } },
+  { id: 'ocean-24', countryId: 'ocean', name: "Maritime Security", cipherType: 'playfair', plaintext: "MARITIME SECURITY", ciphertext: encrypt("MARITIME SECURITY", 'playfair', { key: "OCEAN" }), hint: "Key: OCEAN", difficulty: 'Hard', params: { key: "OCEAN" } },
+  { id: 'ocean-25', countryId: 'ocean', name: "Submarine Depth", cipherType: 'beaufort', plaintext: "SUBMARINE DEPTH", ciphertext: encrypt("SUBMARINE DEPTH", 'beaufort', { key: "DEPTH" }), hint: "Key: DEPTH", difficulty: 'Hard', params: { key: "DEPTH" } },
+  { id: 'ocean-26', countryId: 'ocean', name: "Whale Song II", cipherType: 'caesar', plaintext: "WHALE SONG ECHOES", ciphertext: encrypt("WHALE SONG ECHOES", 'caesar', { shift: 11 }), hint: "Shift of 11.", difficulty: 'Medium', params: { shift: 11 } },
+  { id: 'ocean-27', countryId: 'ocean', name: "Oceanic Currents", cipherType: 'hill', plaintext: "OCEANIC CURRENTS", ciphertext: encrypt("OCEANIC CURRENTS", 'hill', { matrix: [[3, 5], [1, 2]] }), hint: "Matrix: [[3,5],[1,2]]", difficulty: 'Hard', params: { matrix: [[3, 5], [1, 2]] } },
+  { id: 'ocean-28', countryId: 'ocean', name: "Coastal Guard", cipherType: 'columnar', plaintext: "COASTAL DEFENSE", ciphertext: encrypt("COASTAL DEFENSE", 'columnar', { key: "GUARD" }), hint: "Key: GUARD", difficulty: 'Hard', params: { key: "GUARD" } },
+  { id: 'ocean-29', countryId: 'ocean', name: "Oceana Protocol", cipherType: 'enigma', plaintext: "OCEANA PROTOCOL", ciphertext: encrypt("OCEANA PROTOCOL", 'enigma', { rotors: ['I', 'III', 'V'], positions: [0, 12, 24], plugboard: {} }), hint: "Rotors: I, III, V. Start: AMY.", difficulty: 'Hard', params: { rotors: ['I', 'III', 'V'], positions: [0, 12, 24], plugboard: {} } },
+  { id: 'ocean-30', countryId: 'ocean', name: "Oceana Final", cipherType: 'vigenere', plaintext: "OCEANA FINAL MISSION", ciphertext: encrypt("OCEANA FINAL MISSION", 'vigenere', { key: "VICTORY" }), hint: "Key: VICTORY", difficulty: 'Medium', params: { key: "VICTORY" } },
+
+  // ADDITIONAL TECH LEVELS
+  { id: 'tech-11', countryId: 'tech', name: "Quantum Computing", cipherType: 'hill', plaintext: "QUANTUM COMPUTING", ciphertext: encrypt("QUANTUM COMPUTING", 'hill', { matrix: [[1, 2], [3, 5]] }), hint: "Matrix: [[1,2],[3,5]]", difficulty: 'Hard', params: { matrix: [[1, 2], [3, 5]] } },
+  { id: 'tech-12', countryId: 'tech', name: "Neural Network", cipherType: 'columnar', plaintext: "NEURAL NETWORK", ciphertext: encrypt("NEURAL NETWORK", 'columnar', { key: "BRAIN" }), hint: "Key: BRAIN", difficulty: 'Hard', params: { key: "BRAIN" } },
+  { id: 'tech-13', countryId: 'tech', name: "Cyber Security", cipherType: 'vigenere', plaintext: "CYBER SECURITY", ciphertext: encrypt("CYBER SECURITY", 'vigenere', { key: "LOCK" }), hint: "Key: LOCK", difficulty: 'Medium', params: { key: "LOCK" } },
+  { id: 'tech-14', countryId: 'tech', name: "Digital Interface", cipherType: 'polybius', plaintext: "DIGITAL INTERFACE", ciphertext: encrypt("DIGITAL INTERFACE", 'polybius'), hint: "Grid coords.", difficulty: 'Medium' },
+  { id: 'tech-15', countryId: 'tech', name: "Encrypted DB", cipherType: 'enigma', plaintext: "ENCRYPTED DATABASE", ciphertext: encrypt("ENCRYPTED DATABASE", 'enigma', { rotors: ['I', 'II', 'III'], positions: [1, 2, 3], plugboard: {} }), hint: "Rotors: I, II, III. Start: BCD.", difficulty: 'Hard', params: { rotors: ['I', 'II', 'III'], positions: [1, 2, 3], plugboard: {} } },
+  { id: 'tech-16', countryId: 'tech', name: "AI", cipherType: 'hill', plaintext: "ARTIFICIAL INTELLIGENCE", ciphertext: encrypt("ARTIFICIAL INTELLIGENCE", 'hill', { matrix: [[3, 2], [5, 7]] }), hint: "Matrix: [[3,2],[5,7]]", difficulty: 'Hard', params: { matrix: [[3, 2], [5, 7]] } },
+  { id: 'tech-17', countryId: 'tech', name: "Data Mining", cipherType: 'columnar', plaintext: "DATA MINING", ciphertext: encrypt("DATA MINING", 'columnar', { key: "GOLD" }), hint: "Key: GOLD", difficulty: 'Hard', params: { key: "GOLD" } },
+  { id: 'tech-18', countryId: 'tech', name: "VR", cipherType: 'vigenere', plaintext: "VIRTUAL REALITY", ciphertext: encrypt("VIRTUAL REALITY", 'vigenere', { key: "VIEW" }), hint: "Key: VIEW", difficulty: 'Medium', params: { key: "VIEW" } },
+  { id: 'tech-19', countryId: 'tech', name: "Binary", cipherType: 'polybius', plaintext: "BINARY CODE", ciphertext: encrypt("BINARY CODE", 'polybius'), hint: "5x5 square.", difficulty: 'Medium' },
+  { id: 'tech-20', countryId: 'tech', name: "Override", cipherType: 'enigma', plaintext: "SYSTEM OVERRIDE", ciphertext: encrypt("SYSTEM OVERRIDE", 'enigma', { rotors: ['II', 'IV', 'V'], positions: [10, 10, 10], plugboard: { 'S': 'Y', 'Y': 'S' } }), hint: "Rotors: II, IV, V. Start: KKK. Plugs: S-Y.", difficulty: 'Hard', params: { rotors: ['II', 'IV', 'V'], positions: [10, 10, 10], plugboard: { 'S': 'Y', 'Y': 'S' } } },
+  { id: 'tech-21', countryId: 'tech', name: "Mainframe Access", cipherType: 'caesar', plaintext: "MAINFRAME ACCESS GRANTED", ciphertext: encrypt("MAINFRAME ACCESS GRANTED", 'caesar', { shift: 13 }), hint: "Shift of 13.", difficulty: 'Medium', params: { shift: 13 } },
+  { id: 'tech-22', countryId: 'tech', name: "Firewall Bypass", cipherType: 'atbash', plaintext: "FIREWALL BYPASS SUCCESS", ciphertext: encrypt("FIREWALL BYPASS SUCCESS", 'atbash'), hint: "Atbash mirror.", difficulty: 'Medium' },
+  { id: 'tech-23', countryId: 'tech', name: "Encryption Key", cipherType: 'affine', plaintext: "ENCRYPTION KEY FOUND", ciphertext: encrypt("ENCRYPTION KEY FOUND", 'affine', { a: 7, b: 3 }), hint: "a=7, b=3", difficulty: 'Medium', params: { a: 7, b: 3 } },
+  { id: 'tech-24', countryId: 'tech', name: "System Kernel", cipherType: 'railfence', plaintext: "SYSTEM KERNEL SECURE", ciphertext: encrypt("SYSTEM KERNEL SECURE", 'railfence', { rails: 3 }), hint: "3 rails.", difficulty: 'Medium', params: { rails: 3 } },
+  { id: 'tech-25', countryId: 'tech', name: "Technopolis Final", cipherType: 'enigma', plaintext: "TECHNOPOLIS IS UNDER CONTROL", ciphertext: encrypt("TECHNOPOLIS IS UNDER CONTROL", 'enigma', { rotors: ['I', 'IV', 'V'], positions: [0, 0, 0], plugboard: {} }), hint: "Rotors: I, IV, V. Start: AAA.", difficulty: 'Hard', params: { rotors: ['I', 'IV', 'V'], positions: [0, 0, 0], plugboard: {} } },
+  { id: 'tech-26', countryId: 'tech', name: "Quantum Encryption", cipherType: 'atbash', plaintext: "QUANTUM ENCRYPTION", ciphertext: encrypt("QUANTUM ENCRYPTION", 'atbash'), hint: "Atbash mirror.", difficulty: 'Medium' },
+  { id: 'tech-27', countryId: 'tech', name: "Neural Interface", cipherType: 'railfence', plaintext: "NEURAL INTERFACE", ciphertext: encrypt("NEURAL INTERFACE", 'railfence', { rails: 3 }), hint: "3 rails.", difficulty: 'Medium', params: { rails: 3 } },
+  { id: 'tech-28', countryId: 'tech', name: "Cyber Defense", cipherType: 'affine', plaintext: "CYBER DEFENSE", ciphertext: encrypt("CYBER DEFENSE", 'affine', { a: 11, b: 4 }), hint: "a=11, b=4", difficulty: 'Medium', params: { a: 11, b: 4 } },
+  { id: 'tech-29', countryId: 'tech', name: "Digital Soul", cipherType: 'monoalphabetic', plaintext: "DIGITAL SOUL", ciphertext: encrypt("DIGITAL SOUL", 'monoalphabetic', { alphabet: "MNBVCXZLKJHGFDSAPOIUYTREWQ" }), hint: "Shuffled alphabet.", difficulty: 'Hard', params: { alphabet: "MNBVCXZLKJHGFDSAPOIUYTREWQ" } },
+  { id: 'tech-30', countryId: 'tech', name: "Technopolis Master", cipherType: 'playfair', plaintext: "TECHNOPOLIS MASTER", ciphertext: encrypt("TECHNOPOLIS MASTER", 'playfair', { key: "MASTER" }), hint: "Key: MASTER", difficulty: 'Hard', params: { key: "MASTER" } },
+] as Level[]).map(level => ({
+  ...level,
+  xpReward: getXpReward(level)
+}));
+
+export const RANKS = [
+  { minLevel: 1, maxLevel: 10, name: "Novice" },
+  { minLevel: 11, maxLevel: 20, name: "Cadet" },
+  { minLevel: 21, maxLevel: 30, name: "Agent" },
+  { minLevel: 31, maxLevel: 40, name: "Specialist" },
+  { minLevel: 41, maxLevel: 50, name: "Elite" },
+  { minLevel: 51, maxLevel: 60, name: "Master" },
+  { minLevel: 61, maxLevel: 70, name: "Grandmaster" },
+  { minLevel: 71, maxLevel: 80, name: "Legend" },
+  { minLevel: 81, maxLevel: 90, name: "Mythic" },
+  { minLevel: 91, maxLevel: 100, name: "Cipher Lord" },
+];
+
+export const getRankName = (level: number) => {
+  const rank = RANKS.find(r => level >= r.minLevel && level <= r.maxLevel);
+  return rank ? rank.name : "Cipher Lord";
+};
+
+export const getXpForLevel = (level: number) => {
+  if (level <= 1) return 0;
+  return Math.floor(500 * Math.pow(level - 1, 1.5));
+};
+
+export const getDailyLevel = (date: Date = new Date(), difficulty: 'Easy' | 'Medium' | 'Hard' = 'Medium'): Level => {
+  const dateString = date.toISOString().split('T')[0];
+  const diffOffset = difficulty === 'Easy' ? 0 : difficulty === 'Medium' ? 1 : 2;
+  const seed = date.getDate() + date.getMonth() + date.getFullYear() + diffOffset;
+  
+  const easyCiphers: CipherType[] = ['caesar', 'atbash'];
+  const mediumCiphers: CipherType[] = ['polybius', 'affine'];
+  const hardCiphers: CipherType[] = ['vigenere', 'monoalphabetic', 'playfair', 'railfence', 'beaufort', 'columnar', 'hill', 'enigma'];
+  
+  let type: CipherType;
+  if (difficulty === 'Easy') type = easyCiphers[seed % easyCiphers.length];
+  else if (difficulty === 'Medium') type = mediumCiphers[seed % mediumCiphers.length];
+  else type = hardCiphers[seed % hardCiphers.length];
+  
+  const dailyTexts = [
+    "THE FUTURE BELONGS TO THOSE WHO BELIEVE IN THE BEAUTY OF THEIR DREAMS",
+    "SUCCESS IS NOT FINAL FAILURE IS NOT FATAL IT IS THE COURAGE TO CONTINUE THAT COUNTS",
+    "IN THE MIDDLE OF EVERY DIFFICULTY LIES OPPORTUNITY FOR THOSE WHO SEEK IT",
+    "THE ONLY WAY TO DO GREAT WORK IS TO LOVE WHAT YOU DO EVERY SINGLE DAY",
+    "BELIEVE YOU CAN AND YOU ARE HALFWAY THERE TO ACHIEVING YOUR GOALS",
+    "KNOWLEDGE IS POWER AND IMAGINATION IS MORE IMPORTANT THAN KNOWLEDGE",
+    "THE JOURNEY OF A THOUSAND MILES BEGINS WITH A SINGLE STEP",
+    "DO NOT GO WHERE THE PATH MAY LEAD GO INSTEAD WHERE THERE IS NO PATH AND LEAVE A TRAIL"
+  ];
+
+  const longTexts = [
+    "SECURITY IS MOSTLY A SUPERSTITION IT DOES NOT EXIST IN NATURE NOR DO THE CHILDREN OF MEN AS A WHOLE EXPERIENCE IT AVOIDING DANGER IS NO SAFER IN THE LONG RUN THAN OUTRIGHT EXPOSURE LIFE IS EITHER A DARING ADVENTURE OR NOTHING",
+    "THE GREATEST GLORY IN LIVING LIES NOT IN NEVER FALLING BUT IN RISING EVERY TIME WE FALL AND THE ONLY WAY TO DO GREAT WORK IS TO LOVE WHAT YOU DO IF YOU HAVE NOT FOUND IT YET KEEP LOOKING DO NOT SETTLE AS WITH ALL MATTERS OF THE HEART YOU WILL KNOW WHEN YOU FIND IT",
+    "YOUR TIME IS LIMITED SO DO NOT WASTE IT LIVING SOMEONE ELSE LIFE DO NOT BE TRAPPED BY DOGMA WHICH IS LIVING WITH THE RESULTS OF OTHER PEOPLE THINKING DO NOT LET THE NOISE OF OTHERS OPINIONS DROWN OUT YOUR OWN INNER VOICE AND MOST IMPORTANT HAVE THE COURAGE TO FOLLOW YOUR HEART AND INTUITION",
+    "IN THE END IT IS NOT THE YEARS IN YOUR LIFE THAT COUNT IT IS THE LIFE IN YOUR YEARS THAT MATTERS MOST THE PURPOSE OF OUR LIVES IS TO BE HAPPY AND THE ONLY THING WE HAVE TO FEAR IS FEAR ITSELF WHICH IS A NAMELESS UNREASONING UNJUSTIFIED TERROR WHICH PARALYZES NEEDED EFFORTS TO CONVERT RETREAT INTO ADVANCE"
+  ];
+  
+  const isAnalytical = type === 'vigenere' || type === 'monoalphabetic' || type === 'playfair';
+  const plaintext = isAnalytical 
+    ? longTexts[seed % longTexts.length] 
+    : dailyTexts[seed % dailyTexts.length];
+  let params: any = undefined;
+  if (type === 'caesar') params = { shift: (seed % 10) + 1 };
+  else if (type === 'vigenere') params = { key: difficulty === 'Hard' ? "COMPLEX" : "DAILY" };
+  else if (type === 'railfence') params = { rails: difficulty === 'Easy' ? 2 : (seed % 2) + 3 };
+  else if (type === 'monoalphabetic') params = { alphabet: "XPMGTORACEFHLBDKYSNUVZJIWQ" };
+  else if (type === 'playfair') params = { key: "DAILY" };
+  
+  const countryIdMap: Record<CipherType, string> = {
+    'caesar': 'north',
+    'atbash': 'north',
+    'vigenere': 'coast',
+    'railfence': 'mountain',
+    'polybius': 'island',
+    'monoalphabetic': 'island',
+    'playfair': 'island',
+    'affine': 'desert',
+    'beaufort': 'coast',
+    'columnar': 'mountain',
+    'hill': 'desert',
+    'enigma': 'tech'
+  };
+
+  const level: Level = {
+    id: `daily-${difficulty.toLowerCase()}-${dateString}`,
+    countryId: countryIdMap[type] || 'north',
+    name: `Daily ${difficulty} - ${dateString}`,
+    cipherType: type,
+    plaintext,
+    ciphertext: encrypt(plaintext, type, params),
+    hint: type === 'caesar' ? `Shift is ${params.shift}` : 
+          type === 'vigenere' ? `Key is '${params.key}'` : 
+          type === 'railfence' ? `Rails: ${params.rails}` :
+          type === 'polybius' ? "Use the square" : 
+          type === 'monoalphabetic' ? "Frequency analysis" : "Playfair square",
+    difficulty: difficulty,
+    params,
+    isDaily: true,
+    xpReward: 0 // Placeholder
+  };
+
+  return {
+    ...level,
+    xpReward: getXpReward(level) + (difficulty === 'Easy' ? 50 : difficulty === 'Medium' ? 100 : 200) // Daily bonus
+  };
+};
