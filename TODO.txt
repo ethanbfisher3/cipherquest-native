@@ -1,3 +1,5 @@
 Make the map look better
 Add more ciphers/Levels for each cipher
 Animations every level up to tell the user something
+Make the world map a gif or something so it's more interesting
+Fix the buttons on the world map
