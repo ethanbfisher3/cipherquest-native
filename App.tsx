@@ -1,6 +1,6 @@
 import { StatusBar } from "expo-status-bar"
 import AsyncStorage from "@react-native-async-storage/async-storage"
-import { useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import {
   Alert,
   Animated,
@@ -12,9 +12,15 @@ import {
   StyleSheet,
   Text,
   TextInput,
+  TouchableOpacity,
   View,
 } from "react-native"
-import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context"
+import {
+  SafeAreaProvider,
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context"
+import PagerView from "react-native-pager-view"
 import { ENIGMA_ROTORS } from "./src/ciphers"
 import {
   COUNTRIES,
@@ -25,7 +31,7 @@ import {
   getXpForLevel,
 } from "./src/constants"
 import { EnigmaMachine, EnigmaState } from "./src/components/EnigmaMachine"
-import { AppScreen, Level, Score, UserProfile } from "./src/types"
+import { AppScreen, HomeTab, Level, Score, UserProfile } from "./src/types"
 
 const DEFAULT_UNLOCKED = [
   "c1",
@@ -44,6 +50,13 @@ const DEFAULT_UNLOCKED = [
 const PROFILE_KEY = "localProfile"
 const SCORES_KEY = "localScores"
 
+const HOME_TABS: { key: HomeTab; title: string; icon: string }[] = [
+  { key: "missions", title: "Missions", icon: "🎯" },
+  { key: "challenges", title: "Challenges", icon: "⚡" },
+  { key: "leaderboard", title: "Leaderboard", icon: "🏆" },
+  { key: "profile", title: "Profile", icon: "👤" },
+]
+
 const createDefaultProfile = (): UserProfile => ({
   displayName: "Agent_Local",
   createdAt: new Date().toISOString(),
@@ -56,7 +69,7 @@ const createDefaultProfile = (): UserProfile => ({
 })
 
 export default function App() {
-  const [screen, setScreen] = useState<AppScreen>("menu")
+  const [screen, setScreen] = useState<AppScreen>("home-tabs")
   const [profile, setProfile] = useState<UserProfile | null>(null)
   const [selectedCountryId, setSelectedCountryId] = useState<string | null>(
     null,
@@ -241,7 +254,7 @@ export default function App() {
     setUnlockedLevels(DEFAULT_UNLOCKED)
     setSelectedCountryId(null)
     setSelectedLevel(null)
-    setScreen("menu")
+    setScreen("home-tabs")
     Alert.alert("Dev Tools", "Local profile, scores, and unlocks were reset.")
   }
 
@@ -264,13 +277,14 @@ export default function App() {
     <SafeAreaProvider>
       <SafeAreaView style={styles.root}>
         <StatusBar style="light" />
-        {screen === "menu" && profile && (
-          <MenuScreen
+        {screen === "home-tabs" && profile && (
+          <HomeTabs
             profile={profile}
-            onStart={handleStartMission}
-            onDaily={() => setScreen("daily-selector")}
-            onLeaderboard={() => setScreen("leaderboard")}
-            onProfile={() => setShowProfileModal(true)}
+            onStartMission={handleStartMission}
+            onShowProfileModal={() => setShowProfileModal(true)}
+            onEditProfile={(displayName) => {
+              setShowProfileModal(true)
+            }}
           />
         )}
 
@@ -278,7 +292,7 @@ export default function App() {
 
         {screen === "world-map" && (
           <WorldScreen
-            onBack={() => setScreen("menu")}
+            onBack={() => setScreen("home-tabs")}
             onSelectCountry={(id) => {
               setSelectedCountryId(id)
               setScreen("country-view")
@@ -302,7 +316,7 @@ export default function App() {
         {screen === "daily-selector" && profile && (
           <DailyScreen
             profile={profile}
-            onBack={() => setScreen("menu")}
+            onBack={() => setScreen("home-tabs")}
             onSelect={(difficulty) => {
               const level = getDailyLevel(new Date(), difficulty)
               setSelectedLevel(level)
@@ -324,13 +338,6 @@ export default function App() {
               handleLevelComplete(selectedLevel, seconds)
             }
             onUpdateProfile={setProfile}
-          />
-        )}
-
-        {screen === "leaderboard" && profile && (
-          <LeaderboardScreen
-            profile={profile}
-            onBack={() => setScreen("menu")}
           />
         )}
 
@@ -368,18 +375,99 @@ export default function App() {
   )
 }
 
-function MenuScreen({
+function HomeTabs({
   profile,
-  onStart,
-  onDaily,
-  onLeaderboard,
-  onProfile,
+  onStartMission,
+  onShowProfileModal,
 }: {
   profile: UserProfile
-  onStart: () => void
-  onDaily: () => void
-  onLeaderboard: () => void
-  onProfile: () => void
+  onStartMission: () => void
+  onShowProfileModal: () => void
+  onEditProfile: (displayName: string) => void
+}) {
+  const insets = useSafeAreaInsets()
+  const pagerRef = useRef<PagerView | null>(null)
+  const [currentPage, setCurrentPage] = useState(0)
+
+  const handlePageSelected = useCallback((e: any) => {
+    setCurrentPage(e.nativeEvent.position)
+  }, [])
+
+  const handleTabPress = useCallback((index: number) => {
+    setCurrentPage(index)
+    pagerRef.current?.setPage(index)
+  }, [])
+
+  return (
+    <>
+      <View style={{ flex: 1, backgroundColor: "#0b1014" }}>
+        {/* Swipeable Pager for Tab Content */}
+        <PagerView
+          ref={pagerRef}
+          style={styles.pager}
+          initialPage={0}
+          onPageSelected={handlePageSelected}
+          overdrag={true}
+        >
+          <View key="missions" style={styles.page}>
+            <MissionsTab profile={profile} onStartMission={onStartMission} />
+          </View>
+          <View key="challenges" style={styles.page}>
+            <ChallengesTab profile={profile} />
+          </View>
+          <View key="leaderboard" style={styles.page}>
+            <LeaderboardTab profile={profile} />
+          </View>
+          <View key="profile" style={styles.page}>
+            <ProfileTab profile={profile} onEditProfile={onShowProfileModal} />
+          </View>
+        </PagerView>
+
+        {/* Custom Bottom Tab Bar */}
+        <View
+          style={[
+            styles.tabBar,
+            {
+              paddingBottom: 12 + insets.bottom,
+              height: 72 + insets.bottom,
+            },
+          ]}
+        >
+          {HOME_TABS.map((tab, index) => {
+            const isActive = currentPage === index
+
+            return (
+              <TouchableOpacity
+                key={tab.key}
+                style={styles.tabButton}
+                onPress={() => handleTabPress(index)}
+                activeOpacity={0.7}
+              >
+                <Text
+                  style={[styles.tabIcon, isActive && styles.tabIconActive]}
+                >
+                  {tab.icon}
+                </Text>
+                <Text
+                  style={[styles.tabLabel, isActive && styles.tabLabelActive]}
+                >
+                  {tab.title}
+                </Text>
+              </TouchableOpacity>
+            )
+          })}
+        </View>
+      </View>
+    </>
+  )
+}
+
+function MissionsTab({
+  profile,
+  onStartMission,
+}: {
+  profile: UserProfile
+  onStartMission: () => void
 }) {
   const currentLevelXp = (profile.xp || 0) - getXpForLevel(profile.level || 1)
   const nextLevelXp =
@@ -390,7 +478,10 @@ function MenuScreen({
   )
 
   return (
-    <View style={styles.screenPad}>
+    <ScrollView
+      style={styles.screenPad}
+      contentContainerStyle={{ paddingBottom: 20 }}
+    >
       <Text style={styles.title}>CipherQuest Native</Text>
       <Text style={styles.subtitle}>
         Rank {profile.level} • {getRankName(profile.level)}
@@ -404,20 +495,224 @@ function MenuScreen({
 
       <Pressable
         style={[styles.button, styles.primaryButton]}
-        onPress={onStart}
+        onPress={onStartMission}
       >
         <Text style={styles.primaryButtonText}>Start Mission</Text>
       </Pressable>
-      <Pressable style={styles.button} onPress={onDaily}>
-        <Text style={styles.buttonText}>Daily Challenges</Text>
-      </Pressable>
-      <Pressable style={styles.button} onPress={onLeaderboard}>
-        <Text style={styles.buttonText}>Leaderboards</Text>
-      </Pressable>
-      <Pressable style={styles.button} onPress={onProfile}>
-        <Text style={styles.buttonText}>Profile</Text>
-      </Pressable>
+
+      <Text style={[styles.subtitle, { marginTop: 20 }]}>Quick Stats</Text>
+      <View style={styles.statsGrid}>
+        <View style={styles.statCard}>
+          <Text style={styles.statValue}>{profile.unlockedCount}</Text>
+          <Text style={styles.statLabel}>Levels Unlocked</Text>
+        </View>
+        <View style={styles.statCard}>
+          <Text style={styles.statValue}>{profile.totalScore}</Text>
+          <Text style={styles.statLabel}>Total XP</Text>
+        </View>
+      </View>
+    </ScrollView>
+  )
+}
+
+function ChallengesTab({ profile }: { profile: UserProfile }) {
+  const diffs: ("Easy" | "Medium" | "Hard")[] = ["Easy", "Medium", "Hard"]
+
+  return (
+    <ScrollView
+      style={styles.screenPad}
+      contentContainerStyle={{ paddingBottom: 20 }}
+    >
+      <Text style={styles.title}>Daily Challenges</Text>
+      <Text style={styles.body}>
+        Complete daily cipher challenges to earn bonus XP!
+      </Text>
+
+      {diffs.map((diff) => {
+        const daily = getDailyLevel(new Date(), diff)
+        const completed = !!profile.missionProgress?.[daily.id]
+        return (
+          <Pressable key={diff} style={styles.card} onPress={() => {}}>
+            <Text style={styles.cardTitle}>
+              {diff} Daily {completed ? "✓" : ""}
+            </Text>
+            <Text style={styles.muted}>
+              {daily.cipherType} • +{daily.xpReward} XP
+            </Text>
+          </Pressable>
+        )
+      })}
+    </ScrollView>
+  )
+}
+
+function LeaderboardTab({ profile }: { profile: UserProfile }) {
+  const [scores, setScores] = useState<Score[]>([])
+  const [players, setPlayers] = useState<UserProfile[]>([])
+  const [tab, setTab] = useState<"missions" | "players">("players")
+  const [selectedLevelId, setSelectedLevelId] = useState(LEVELS[0].id)
+
+  useEffect(() => {
+    const loadLocalLeaderboard = async () => {
+      if (tab === "players") {
+        setPlayers([profile])
+        setScores([])
+        return
+      }
+
+      const rawScores = await AsyncStorage.getItem("localScores")
+      const parsed = rawScores ? (JSON.parse(rawScores) as Score[]) : []
+      const missionScores = parsed
+        .filter((s) => s.levelId === selectedLevelId)
+        .sort((a, b) => a.timeInSeconds - b.timeInSeconds)
+      setScores(missionScores)
+      setPlayers([])
+    }
+
+    loadLocalLeaderboard()
+  }, [tab, selectedLevelId])
+
+  return (
+    <View style={styles.screenPad}>
+      <Text style={styles.title}>Leaderboards</Text>
+      <View style={styles.row}>
+        <Pressable
+          style={[
+            styles.smallButton,
+            tab === "missions" && styles.smallButtonActive,
+          ]}
+          onPress={() => setTab("missions")}
+        >
+          <Text style={styles.smallButtonText}>Top Times</Text>
+        </Pressable>
+        <Pressable
+          style={[
+            styles.smallButton,
+            tab === "players" && styles.smallButtonActive,
+          ]}
+          onPress={() => setTab("players")}
+        >
+          <Text style={styles.smallButtonText}>Agents</Text>
+        </Pressable>
+      </View>
+
+      {tab === "missions" && (
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={{ marginBottom: 10 }}
+        >
+          {LEVELS.map((lvl) => (
+            <Pressable
+              key={lvl.id}
+              style={[
+                styles.levelChip,
+                selectedLevelId === lvl.id && styles.levelChipActive,
+              ]}
+              onPress={() => setSelectedLevelId(lvl.id)}
+            >
+              <Text style={styles.smallButtonText}>{lvl.id.toUpperCase()}</Text>
+            </Pressable>
+          ))}
+        </ScrollView>
+      )}
+
+      {tab === "players" ? (
+        <FlatList
+          scrollEnabled={false}
+          data={players}
+          keyExtractor={(item, index) => `${item.displayName}-${index}`}
+          renderItem={({ item, index }) => (
+            <View style={styles.card}>
+              <Text style={styles.cardTitle}>
+                #{index + 1} {item.displayName}
+              </Text>
+              <Text style={styles.muted}>
+                {`LVL ${item.level || 1} • ${getRankName(item.level || 1)}`}
+                {item.displayName === profile.displayName ? " • YOU" : ""}
+              </Text>
+            </View>
+          )}
+        />
+      ) : (
+        <FlatList
+          scrollEnabled={false}
+          data={scores}
+          keyExtractor={(_, index) => `${index}`}
+          renderItem={({ item, index }) => (
+            <View style={styles.card}>
+              <Text style={styles.cardTitle}>
+                #{index + 1} {item.displayName}
+              </Text>
+              <Text style={styles.muted}>
+                {`${item.timeInSeconds}s`}
+                {item.displayName === profile.displayName ? " • YOU" : ""}
+              </Text>
+            </View>
+          )}
+        />
+      )}
     </View>
+  )
+}
+
+function ProfileTab({
+  profile,
+  onEditProfile,
+}: {
+  profile: UserProfile
+  onEditProfile: () => void
+}) {
+  return (
+    <ScrollView
+      style={styles.screenPad}
+      contentContainerStyle={{ paddingBottom: 20 }}
+    >
+      <Text style={styles.title}>Agent Profile</Text>
+
+      <View style={styles.profileSection}>
+        <Text style={styles.label}>Codename</Text>
+        <Text style={styles.profileValue}>{profile.displayName}</Text>
+      </View>
+
+      <View style={styles.profileSection}>
+        <Text style={styles.label}>Rank</Text>
+        <Text style={styles.profileValue}>
+          {profile.level} • {getRankName(profile.level)}
+        </Text>
+      </View>
+
+      <View style={styles.profileSection}>
+        <Text style={styles.label}>Statistics</Text>
+        <View style={styles.statsGrid}>
+          <View style={styles.statCard}>
+            <Text style={styles.statValue}>{profile.level}</Text>
+            <Text style={styles.statLabel}>Level</Text>
+          </View>
+          <View style={styles.statCard}>
+            <Text style={styles.statValue}>{profile.xp}</Text>
+            <Text style={styles.statLabel}>XP</Text>
+          </View>
+          <View style={styles.statCard}>
+            <Text style={styles.statValue}>{profile.unlockedCount}</Text>
+            <Text style={styles.statLabel}>Unlocked</Text>
+          </View>
+        </View>
+      </View>
+
+      <Pressable
+        style={[styles.button, styles.primaryButton]}
+        onPress={onEditProfile}
+      >
+        <Text style={styles.primaryButtonText}>Edit Profile</Text>
+      </Pressable>
+
+      {!profile.isPro && (
+        <Pressable style={styles.button}>
+          <Text style={styles.buttonText}>Upgrade to Pro</Text>
+        </Pressable>
+      )}
+    </ScrollView>
   )
 }
 
@@ -743,120 +1038,6 @@ function GameScreen({
   )
 }
 
-function LeaderboardScreen({
-  profile,
-  onBack,
-}: {
-  profile: UserProfile
-  onBack: () => void
-}) {
-  const [scores, setScores] = useState<Score[]>([])
-  const [players, setPlayers] = useState<UserProfile[]>([])
-  const [tab, setTab] = useState<"missions" | "players">("missions")
-  const [selectedLevelId, setSelectedLevelId] = useState(LEVELS[0].id)
-
-  useEffect(() => {
-    const loadLocalLeaderboard = async () => {
-      if (tab === "players") {
-        setPlayers([profile])
-        setScores([])
-        return
-      }
-
-      const rawScores = await AsyncStorage.getItem(SCORES_KEY)
-      const parsed = rawScores ? (JSON.parse(rawScores) as Score[]) : []
-      const missionScores = parsed
-        .filter((s) => s.levelId === selectedLevelId)
-        .sort((a, b) => a.timeInSeconds - b.timeInSeconds)
-      setScores(missionScores)
-      setPlayers([])
-    }
-
-    loadLocalLeaderboard()
-  }, [tab, selectedLevelId])
-
-  return (
-    <View style={styles.screenPad}>
-      <Header title="Leaderboard" onBack={onBack} />
-      <View style={styles.row}>
-        <Pressable
-          style={[
-            styles.smallButton,
-            tab === "missions" && styles.smallButtonActive,
-          ]}
-          onPress={() => setTab("missions")}
-        >
-          <Text style={styles.smallButtonText}>Missions</Text>
-        </Pressable>
-        <Pressable
-          style={[
-            styles.smallButton,
-            tab === "players" && styles.smallButtonActive,
-          ]}
-          onPress={() => setTab("players")}
-        >
-          <Text style={styles.smallButtonText}>Top Agents</Text>
-        </Pressable>
-      </View>
-
-      {tab === "missions" && (
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          style={{ marginBottom: 10 }}
-        >
-          {LEVELS.map((lvl) => (
-            <Pressable
-              key={lvl.id}
-              style={[
-                styles.levelChip,
-                selectedLevelId === lvl.id && styles.levelChipActive,
-              ]}
-              onPress={() => setSelectedLevelId(lvl.id)}
-            >
-              <Text style={styles.smallButtonText}>{lvl.id.toUpperCase()}</Text>
-            </Pressable>
-          ))}
-        </ScrollView>
-      )}
-
-      {tab === "players" ? (
-        <FlatList
-          data={players}
-          keyExtractor={(item, index) => `${item.displayName}-${index}`}
-          renderItem={({ item, index }) => (
-            <View style={styles.card}>
-              <Text style={styles.cardTitle}>
-                #{index + 1} {item.displayName}
-              </Text>
-              <Text style={styles.muted}>
-                {`LVL ${item.level || 1} • ${getRankName(item.level || 1)}`}
-                {item.displayName === profile.displayName ? " • YOU" : ""}
-              </Text>
-            </View>
-          )}
-        />
-      ) : (
-        <FlatList
-          data={scores}
-          keyExtractor={(_, index) => `${index}`}
-          renderItem={({ item, index }) => (
-            <View style={styles.card}>
-              <Text style={styles.cardTitle}>
-                #{index + 1} {item.displayName}
-              </Text>
-              <Text style={styles.muted}>
-                {`${item.timeInSeconds}s`}
-                {item.displayName === profile.displayName ? " • YOU" : ""}
-              </Text>
-            </View>
-          )}
-        />
-      )}
-    </View>
-  )
-}
-
 function ProfileModal({
   visible,
   profile,
@@ -1083,9 +1264,12 @@ const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: "#0b1014" },
   centered: { flex: 1, alignItems: "center", justifyContent: "center" },
   screenPad: { flex: 1, padding: 16 },
+  pager: { flex: 1 },
+  page: { flex: 1 },
   title: { color: "#e6edf3", fontSize: 28, fontWeight: "800", marginBottom: 8 },
   headerTitle: { color: "#e6edf3", fontSize: 20, fontWeight: "700" },
   subtitle: { color: "#7fb39f", fontSize: 14, marginBottom: 12 },
+  label: { color: "#8b98a5", fontSize: 12, marginBottom: 4 },
   muted: { color: "#8b98a5", fontSize: 12, marginBottom: 8 },
   body: { color: "#d0d7de", fontSize: 14, lineHeight: 20, marginBottom: 10 },
   progressOuter: {
@@ -1172,6 +1356,76 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   levelChipActive: { backgroundColor: "#14b86c", borderColor: "#14b86c" },
+  tabBar: {
+    flexDirection: "row",
+    backgroundColor: "#111820",
+    borderTopWidth: 1,
+    borderTopColor: "#2a3542",
+    paddingBottom: 12,
+    paddingTop: 8,
+    height: 72,
+  },
+  tabButton: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 8,
+  },
+  tabIcon: {
+    fontSize: 24,
+    marginBottom: 4,
+    color: "#8b98a5",
+  },
+  tabIconActive: {
+    color: "#14b86c",
+  },
+  tabLabel: {
+    fontSize: 11,
+    fontWeight: "600",
+    color: "#8b98a5",
+  },
+  tabLabelActive: {
+    color: "#14b86c",
+  },
+  statsGrid: {
+    flexDirection: "row",
+    gap: 10,
+    marginBottom: 10,
+  },
+  statCard: {
+    flex: 1,
+    backgroundColor: "#111820",
+    borderColor: "#2a3542",
+    borderWidth: 1,
+    borderRadius: 10,
+    padding: 12,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  statValue: {
+    color: "#14b86c",
+    fontSize: 20,
+    fontWeight: "800",
+    marginBottom: 4,
+  },
+  statLabel: {
+    color: "#8b98a5",
+    fontSize: 11,
+    fontWeight: "600",
+  },
+  profileSection: {
+    backgroundColor: "#111820",
+    borderColor: "#2a3542",
+    borderWidth: 1,
+    borderRadius: 10,
+    padding: 12,
+    marginBottom: 12,
+  },
+  profileValue: {
+    color: "#e6edf3",
+    fontSize: 14,
+    fontWeight: "600",
+  },
   modalBackdrop: {
     flex: 1,
     backgroundColor: "rgba(0,0,0,0.55)",

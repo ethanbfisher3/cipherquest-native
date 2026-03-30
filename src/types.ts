@@ -71,7 +71,7 @@ export interface Country {
 }
 
 export type AppScreen =
-  | "menu"
+  | "home-tabs"
   | "intro"
   | "world-map"
   | "country-view"
@@ -79,3 +79,5 @@ export type AppScreen =
   | "game"
   | "leaderboard"
   | "daily-selector"
+
+export type HomeTab = "missions" | "challenges" | "leaderboard" | "profile"

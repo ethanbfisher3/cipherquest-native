@@ -1,0 +1,3 @@
+Make the map look better
+Add more ciphers/Levels for each cipher
+Animations every level up to tell the user something
