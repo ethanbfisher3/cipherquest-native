@@ -30,9 +30,9 @@ export function WorldScreen({
   );
   const [mapOffset, setMapOffset] = useState({ x: -175, y: 0 });
   const [actualMapSize, setActualMapSize] = useState({ width: 0, height: 0 });
-  const [mapZoom, setMapZoom] = useState(0.25);
+  const [mapZoom, setMapZoom] = useState(0.253);
 
-  const MIN_ZOOM = 0.25;
+  const MIN_ZOOM = 0.253;
   const MAX_ZOOM = 1.5;
 
   const zoomRef = useRef(mapZoom);
@@ -151,10 +151,18 @@ export function WorldScreen({
   // ----------------------
   const panResponder = useRef(
     PanResponder.create({
-      onStartShouldSetPanResponder: () => true,
-      onStartShouldSetPanResponderCapture: () => true,
-      onMoveShouldSetPanResponder: () => true,
-      onMoveShouldSetPanResponderCapture: () => true,
+      onStartShouldSetPanResponder: () => false,
+      onStartShouldSetPanResponderCapture: () => false,
+      onMoveShouldSetPanResponder: (evt, gestureState) => {
+        const { dx, dy } = gestureState;
+        const touches = evt.nativeEvent.touches;
+        return touches.length > 1 || Math.abs(dx) > 8 || Math.abs(dy) > 8;
+      },
+      onMoveShouldSetPanResponderCapture: (evt, gestureState) => {
+        const { dx, dy } = gestureState;
+        const touches = evt.nativeEvent.touches;
+        return touches.length > 1 || Math.abs(dx) > 8 || Math.abs(dy) > 8;
+      },
 
       onPanResponderGrant: (evt) => {
         stopMomentum();
@@ -307,20 +315,16 @@ export function WorldScreen({
                     },
                     isSelected && styles.mapMarkerSelected,
                   ]}
-                  onPress={() => setSelectedCountryId(country.id)}
+                  onPress={() =>
+                    setSelectedCountryId(
+                      country.id === selectedCountryId ? null : country.id,
+                    )
+                  }
                 >
                   <Text style={styles.mapMarkerLabel}>{country.name}</Text>
                 </Pressable>
               );
             })}
-
-            {selectedCountry && (
-              <View style={styles.mapSelectedBanner}>
-                <Text style={styles.mapSelectedText}>
-                  {selectedCountry.name}
-                </Text>
-              </View>
-            )}
           </ImageBackground>
         </View>
       </View>

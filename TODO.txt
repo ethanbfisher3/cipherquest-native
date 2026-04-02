@@ -1,5 +1,15 @@
-Make the map look better
 Add more ciphers/Levels for each cipher
 Animations every level up to tell the user something
+Slideshow for each country just like the starting slideshow. Give each on a story
+Redesign the world map page to always have something covering the bottom half, make just the container for the country information, but empty
+Video Ads every few levels and/or banner ads during the level
+Tutorial
+Have resources that make it easier for the user to complete each cipher, maybe a notes section or something
+
+Map:
+Make the map look better
 Make the world map a gif or something so it's more interesting
-Fix the buttons on the world map
+When the user clicks on a country, light up its borders or something
+
+
+Maybe:

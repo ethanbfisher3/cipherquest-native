@@ -13,6 +13,7 @@ import {
 } from "react-native";
 import PagerView from "react-native-pager-view";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { LearnTab } from "./Learn";
 import {
   getDailyLevel,
   getRankName,
@@ -20,8 +21,9 @@ import {
   LEVELS,
 } from "../constants";
 import { HomeTab, Score, UserProfile } from "../types";
+import Entypo from "@expo/vector-icons/Entypo";
 
-const ICON_SIZE = 24;
+const ICON_SIZE = 28;
 
 const HOME_TABS: {
   key: HomeTab;
@@ -56,6 +58,17 @@ const HOME_TABS: {
     icon: (isActive) => (
       <Ionicons
         name="trophy"
+        size={ICON_SIZE}
+        color={isActive ? "#14b86c" : "#ccc"}
+      />
+    ),
+  },
+  {
+    key: "learn",
+    title: "Learn",
+    icon: (isActive) => (
+      <Entypo
+        name="open-book"
         size={ICON_SIZE}
         color={isActive ? "#14b86c" : "#ccc"}
       />
@@ -114,6 +127,9 @@ export function HomeTabs({
         <View key="leaderboard" style={styles.page}>
           <LeaderboardTab profile={profile} />
         </View>
+        <View key="learn" style={styles.page}>
+          <LearnTab profile={profile} onEditProfile={onShowProfileModal} />
+        </View>
         <View key="profile" style={styles.page}>
           <ProfileTab profile={profile} onEditProfile={onShowProfileModal} />
         </View>
@@ -123,7 +139,7 @@ export function HomeTabs({
         style={[
           styles.tabBar,
           {
-            height: 48 + insets.bottom,
+            height: 46 + insets.bottom,
           },
         ]}
       >
@@ -138,11 +154,17 @@ export function HomeTabs({
               activeOpacity={0.7}
             >
               {tab.icon(isActive)}
-              <Text
-                style={[styles.tabLabel, isActive && styles.tabLabelActive]}
-              >
-                {tab.title}
-              </Text>
+              {isActive && (
+                <Text
+                  style={[
+                    styles.tabLabel,
+                    isActive && styles.tabLabelActive,
+                    tab.title === "Leaderboard" && { fontSize: 11 },
+                  ]}
+                >
+                  {tab.title}
+                </Text>
+              )}
             </TouchableOpacity>
           );
         })}
@@ -171,7 +193,7 @@ function MissionsTab({
       style={styles.screenPad}
       contentContainerStyle={{ paddingBottom: 20 }}
     >
-      <Text style={styles.title}>CipherQuest Native</Text>
+      <Text style={styles.title}>CipherQuest</Text>
       <Text style={styles.subtitle}>
         Rank {profile.level} • {getRankName(profile.level)}
       </Text>
