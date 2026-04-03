@@ -1,5 +1,48 @@
-import { Level, CipherType, Country } from "./types";
-import { encrypt } from "./ciphers";
+import { Level, CipherType, Country, CIPHER_MIN_LENGTH } from "./types"
+import { encrypt } from "./ciphers"
+
+const CIPHER_EXPANSION_SUFFIX: Record<CipherType, string> = {
+  caesar: " MAINTAIN SHIFT DISCIPLINE ACROSS EVERY WORD IN THIS TRANSMISSION",
+  atbash:
+    " VERIFY EACH LETTER AGAINST THE MIRRORED ALPHABET TABLE BEFORE FINAL DECODING",
+  vigenere:
+    " ALIGN KEYWORD CYCLES PRECISELY AND TRACK EACH POSITION WITHOUT LOSING SYNCHRONIZATION",
+  railfence:
+    " TRACE THE ZIGZAG RAIL PATTERN CAREFULLY THEN REASSEMBLE THE MESSAGE IN ORDER",
+  polybius:
+    " CONVERT EACH LETTER TO ITS GRID COORDINATE PAIR AND VALIDATE ROW COLUMN MAPPINGS",
+  monoalphabetic:
+    " APPLY FREQUENCY ANALYSIS PATTERN MATCHING AND SUBSTITUTION CHECKS UNTIL THE MESSAGE STABILIZES",
+  playfair:
+    " BUILD THE DIGRAPH MATRIX CORRECTLY HANDLE REPEATED LETTER PAIRS AND VERIFY RECTANGLE RULES",
+  affine:
+    " USE MODULAR ARITHMETIC WITH VALID MULTIPLICATIVE INVERSES TO RECOVER THE ORIGINAL PLAINTEXT",
+  beaufort:
+    " REPEAT THE KEY STREAM CONSISTENTLY AND APPLY THE RECIPROCAL TRANSFORMATION FOR EACH CHARACTER",
+  columnar:
+    " FILL THE TRANSPOSED GRID METHODICALLY THEN READ COLUMNS BY SORTED KEY ORDER WITHOUT SKIPPING",
+  hill: " MULTIPLY PLAINTEXT VECTORS WITH THE KEY MATRIX MODULO TWENTY SIX AND CHECK BLOCK ALIGNMENT",
+  enigma:
+    " CONFIRM ROTOR ORDER START POSITIONS AND SIGNAL PATH STEPPING BEFORE EACH KEYSTROKE SEQUENCE",
+}
+
+const enforceCipherMinimumLength = (level: Level): Level => {
+  const minLength = CIPHER_MIN_LENGTH[level.cipherType] ?? 0
+  const source = level.plaintext.trim().replace(/\s+/g, " ")
+  let remadePlaintext = source
+
+  while (remadePlaintext.length < minLength) {
+    remadePlaintext = `${remadePlaintext}${CIPHER_EXPANSION_SUFFIX[level.cipherType]}`
+  }
+
+  remadePlaintext = remadePlaintext.trim()
+
+  return {
+    ...level,
+    plaintext: remadePlaintext,
+    ciphertext: encrypt(remadePlaintext, level.cipherType, level.params),
+  }
+}
 
 export const COUNTRIES: Country[] = [
   {
@@ -151,7 +194,7 @@ export const COUNTRIES: Country[] = [
     threatLevel: "High",
     encryptionStandard: "Enigma-X",
   },
-];
+]
 
 export const INTRO_STORY = [
   {
@@ -174,14 +217,14 @@ export const INTRO_STORY = [
     text: "Each nation holds a piece of the puzzle. From the frozen peaks of Aethelgard to the floating cities of Oceana, follow the trail of ciphers wherever they lead.",
     image: "https://picsum.photos/seed/cipher4/800/600?blur=2",
   },
-];
+]
 
 export interface CipherInfo {
-  type: CipherType;
-  name: string;
-  description: string;
-  difficulty: "Easy" | "Medium" | "Hard";
-  howTo: string;
+  type: CipherType
+  name: string
+  description: string
+  difficulty: "Easy" | "Medium" | "Hard"
+  howTo: string
 }
 
 export const CIPHER_INFOS: CipherInfo[] = [
@@ -392,16 +435,16 @@ To crack it, use frequency analysis: in English, 'E' is the most common letter, 
 
 To decrypt, reverse the shifts!`,
   },
-];
+]
 
 export const getXpReward = (level: Level): number => {
-  const length = level.plaintext.length;
+  const length = level.plaintext.length
   let baseXP =
     level.difficulty === "Easy"
       ? 100
       : level.difficulty === "Medium"
         ? 250
-        : 500;
+        : 500
 
   // Dynamic XP based on length and cipher nature
   if (
@@ -410,7 +453,7 @@ export const getXpReward = (level: Level): number => {
     level.cipherType === "atbash"
   ) {
     // Formulaic: Longer is harder/takes more time
-    return baseXP + Math.floor(length * 2);
+    return baseXP + Math.floor(length * 2)
   } else if (
     level.cipherType === "monoalphabetic" ||
     level.cipherType === "playfair" ||
@@ -418,12 +461,12 @@ export const getXpReward = (level: Level): number => {
   ) {
     // Analytical: Shorter is harder to crack (less data), but we now prefer longer messages for crackability
     // We still give a small bonus for shorter ones if they appear, but base it on a higher threshold
-    const lengthBonus = Math.max(0, (150 - length) * 2);
-    return baseXP + lengthBonus + Math.floor(length / 2); // Also reward length slightly as it still takes time to type
+    const lengthBonus = Math.max(0, (150 - length) * 2)
+    return baseXP + lengthBonus + Math.floor(length / 2) // Also reward length slightly as it still takes time to type
   }
 
-  return baseXP;
-};
+  return baseXP
+}
 
 export const LEVELS: Level[] = (
   [
@@ -5102,10 +5145,12 @@ export const LEVELS: Level[] = (
       params: { key: "MASTER" },
     },
   ] as Level[]
-).map((level) => ({
-  ...level,
-  xpReward: getXpReward(level),
-}));
+)
+  .map((level) => enforceCipherMinimumLength(level))
+  .map((level) => ({
+    ...level,
+    xpReward: getXpReward(level),
+  }))
 
 export const RANKS = [
   { minLevel: 1, maxLevel: 10, name: "Novice" },
@@ -5118,30 +5163,29 @@ export const RANKS = [
   { minLevel: 71, maxLevel: 80, name: "Legend" },
   { minLevel: 81, maxLevel: 90, name: "Mythic" },
   { minLevel: 91, maxLevel: 100, name: "Cipher Lord" },
-];
+]
 
 export const getRankName = (level: number) => {
-  const rank = RANKS.find((r) => level >= r.minLevel && level <= r.maxLevel);
-  return rank ? rank.name : "Cipher Lord";
-};
+  const rank = RANKS.find((r) => level >= r.minLevel && level <= r.maxLevel)
+  return rank ? rank.name : "Cipher Lord"
+}
 
 export const getXpForLevel = (level: number) => {
-  if (level <= 1) return 0;
-  return Math.floor(500 * Math.pow(level - 1, 1.5));
-};
+  if (level <= 1) return 0
+  return Math.floor(500 * Math.pow(level - 1, 1.5))
+}
 
 export const getDailyLevel = (
   date: Date = new Date(),
   difficulty: "Easy" | "Medium" | "Hard" = "Medium",
 ): Level => {
-  const dateString = date.toISOString().split("T")[0];
-  const diffOffset =
-    difficulty === "Easy" ? 0 : difficulty === "Medium" ? 1 : 2;
+  const dateString = date.toISOString().split("T")[0]
+  const diffOffset = difficulty === "Easy" ? 0 : difficulty === "Medium" ? 1 : 2
   const seed =
-    date.getDate() + date.getMonth() + date.getFullYear() + diffOffset;
+    date.getDate() + date.getMonth() + date.getFullYear() + diffOffset
 
-  const easyCiphers: CipherType[] = ["caesar", "atbash"];
-  const mediumCiphers: CipherType[] = ["polybius", "affine"];
+  const easyCiphers: CipherType[] = ["caesar", "atbash"]
+  const mediumCiphers: CipherType[] = ["polybius", "affine"]
   const hardCiphers: CipherType[] = [
     "vigenere",
     "monoalphabetic",
@@ -5151,13 +5195,13 @@ export const getDailyLevel = (
     "columnar",
     "hill",
     "enigma",
-  ];
+  ]
 
-  let type: CipherType;
-  if (difficulty === "Easy") type = easyCiphers[seed % easyCiphers.length];
+  let type: CipherType
+  if (difficulty === "Easy") type = easyCiphers[seed % easyCiphers.length]
   else if (difficulty === "Medium")
-    type = mediumCiphers[seed % mediumCiphers.length];
-  else type = hardCiphers[seed % hardCiphers.length];
+    type = mediumCiphers[seed % mediumCiphers.length]
+  else type = hardCiphers[seed % hardCiphers.length]
 
   const dailyTexts = [
     "THE FUTURE BELONGS TO THOSE WHO BELIEVE IN THE BEAUTY OF THEIR DREAMS",
@@ -5168,29 +5212,29 @@ export const getDailyLevel = (
     "KNOWLEDGE IS POWER AND IMAGINATION IS MORE IMPORTANT THAN KNOWLEDGE",
     "THE JOURNEY OF A THOUSAND MILES BEGINS WITH A SINGLE STEP",
     "DO NOT GO WHERE THE PATH MAY LEAD GO INSTEAD WHERE THERE IS NO PATH AND LEAVE A TRAIL",
-  ];
+  ]
 
   const longTexts = [
     "SECURITY IS MOSTLY A SUPERSTITION IT DOES NOT EXIST IN NATURE NOR DO THE CHILDREN OF MEN AS A WHOLE EXPERIENCE IT AVOIDING DANGER IS NO SAFER IN THE LONG RUN THAN OUTRIGHT EXPOSURE LIFE IS EITHER A DARING ADVENTURE OR NOTHING",
     "THE GREATEST GLORY IN LIVING LIES NOT IN NEVER FALLING BUT IN RISING EVERY TIME WE FALL AND THE ONLY WAY TO DO GREAT WORK IS TO LOVE WHAT YOU DO IF YOU HAVE NOT FOUND IT YET KEEP LOOKING DO NOT SETTLE AS WITH ALL MATTERS OF THE HEART YOU WILL KNOW WHEN YOU FIND IT",
     "YOUR TIME IS LIMITED SO DO NOT WASTE IT LIVING SOMEONE ELSE LIFE DO NOT BE TRAPPED BY DOGMA WHICH IS LIVING WITH THE RESULTS OF OTHER PEOPLE THINKING DO NOT LET THE NOISE OF OTHERS OPINIONS DROWN OUT YOUR OWN INNER VOICE AND MOST IMPORTANT HAVE THE COURAGE TO FOLLOW YOUR HEART AND INTUITION",
     "IN THE END IT IS NOT THE YEARS IN YOUR LIFE THAT COUNT IT IS THE LIFE IN YOUR YEARS THAT MATTERS MOST THE PURPOSE OF OUR LIVES IS TO BE HAPPY AND THE ONLY THING WE HAVE TO FEAR IS FEAR ITSELF WHICH IS A NAMELESS UNREASONING UNJUSTIFIED TERROR WHICH PARALYZES NEEDED EFFORTS TO CONVERT RETREAT INTO ADVANCE",
-  ];
+  ]
 
   const isAnalytical =
-    type === "vigenere" || type === "monoalphabetic" || type === "playfair";
+    type === "vigenere" || type === "monoalphabetic" || type === "playfair"
   const plaintext = isAnalytical
     ? longTexts[seed % longTexts.length]
-    : dailyTexts[seed % dailyTexts.length];
-  let params: any = undefined;
-  if (type === "caesar") params = { shift: (seed % 10) + 1 };
+    : dailyTexts[seed % dailyTexts.length]
+  let params: any = undefined
+  if (type === "caesar") params = { shift: (seed % 10) + 1 }
   else if (type === "vigenere")
-    params = { key: difficulty === "Hard" ? "COMPLEX" : "DAILY" };
+    params = { key: difficulty === "Hard" ? "COMPLEX" : "DAILY" }
   else if (type === "railfence")
-    params = { rails: difficulty === "Easy" ? 2 : (seed % 2) + 3 };
+    params = { rails: difficulty === "Easy" ? 2 : (seed % 2) + 3 }
   else if (type === "monoalphabetic")
-    params = { alphabet: "XPMGTORACEFHLBDKYSNUVZJIWQ" };
-  else if (type === "playfair") params = { key: "DAILY" };
+    params = { alphabet: "XPMGTORACEFHLBDKYSNUVZJIWQ" }
+  else if (type === "playfair") params = { key: "DAILY" }
 
   const countryIdMap: Record<CipherType, string> = {
     caesar: "north",
@@ -5205,7 +5249,7 @@ export const getDailyLevel = (
     columnar: "mountain",
     hill: "desert",
     enigma: "tech",
-  };
+  }
 
   const level: Level = {
     id: `daily-${difficulty.toLowerCase()}-${dateString}`,
@@ -5230,12 +5274,14 @@ export const getDailyLevel = (
     params,
     isDaily: true,
     xpReward: 0, // Placeholder
-  };
+  }
+
+  const normalizedLevel = enforceCipherMinimumLength(level)
 
   return {
-    ...level,
+    ...normalizedLevel,
     xpReward:
-      getXpReward(level) +
+      getXpReward(normalizedLevel) +
       (difficulty === "Easy" ? 50 : difficulty === "Medium" ? 100 : 200), // Daily bonus
-  };
-};
+  }
+}

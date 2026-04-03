@@ -1,7 +1,7 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Ionicons } from "@expo/vector-icons";
-import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage"
+import { Ionicons } from "@expo/vector-icons"
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons"
+import React, { useCallback, useEffect, useRef, useState } from "react"
 import {
   FlatList,
   Pressable,
@@ -10,25 +10,20 @@ import {
   Text,
   TouchableOpacity,
   View,
-} from "react-native";
-import PagerView from "react-native-pager-view";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { LearnTab } from "./Learn";
-import {
-  getDailyLevel,
-  getRankName,
-  getXpForLevel,
-  LEVELS,
-} from "../constants";
-import { HomeTab, Score, UserProfile } from "../types";
-import Entypo from "@expo/vector-icons/Entypo";
+} from "react-native"
+import PagerView from "react-native-pager-view"
+import { useSafeAreaInsets } from "react-native-safe-area-context"
+import { LearnTab } from "./Learn"
+import { getDailyLevel, getRankName, getXpForLevel, LEVELS } from "../constants"
+import { CipherType, HomeTab, Score, UserProfile } from "../types"
+import Entypo from "@expo/vector-icons/Entypo"
 
-const ICON_SIZE = 28;
+const ICON_SIZE = 28
 
 const HOME_TABS: {
-  key: HomeTab;
-  title: string;
-  icon: (isActive: boolean) => React.ReactElement;
+  key: HomeTab
+  title: string
+  icon: (isActive: boolean) => React.ReactElement
 }[] = [
   {
     key: "missions",
@@ -37,7 +32,7 @@ const HOME_TABS: {
       <Ionicons
         name="compass"
         size={ICON_SIZE}
-        color={isActive ? "#14b86c" : "#ccc"}
+        color={isActive ? "#6affbc" : "#6f848e"}
       />
     ),
   },
@@ -48,7 +43,7 @@ const HOME_TABS: {
       <MaterialCommunityIcons
         name="target"
         size={ICON_SIZE}
-        color={isActive ? "#14b86c" : "#ccc"}
+        color={isActive ? "#6affbc" : "#6f848e"}
       />
     ),
   },
@@ -59,7 +54,7 @@ const HOME_TABS: {
       <Ionicons
         name="trophy"
         size={ICON_SIZE}
-        color={isActive ? "#14b86c" : "#ccc"}
+        color={isActive ? "#6affbc" : "#6f848e"}
       />
     ),
   },
@@ -70,7 +65,7 @@ const HOME_TABS: {
       <Entypo
         name="open-book"
         size={ICON_SIZE}
-        color={isActive ? "#14b86c" : "#ccc"}
+        color={isActive ? "#6affbc" : "#6f848e"}
       />
     ),
   },
@@ -81,33 +76,50 @@ const HOME_TABS: {
       <Ionicons
         name="person"
         size={ICON_SIZE}
-        color={isActive ? "#14b86c" : "#ccc"}
+        color={isActive ? "#6affbc" : "#6f848e"}
       />
     ),
   },
-];
+]
 
 export function HomeTabs({
   profile,
   onStartMission,
   onShowProfileModal,
+  requestedTab,
+  onRequestedTabHandled,
+  learnFocusCipherType,
+  learnFocusSignal,
 }: {
-  profile: UserProfile;
-  onStartMission: () => void;
-  onShowProfileModal: () => void;
+  profile: UserProfile
+  onStartMission: () => void
+  onShowProfileModal: () => void
+  requestedTab?: HomeTab | null
+  onRequestedTabHandled?: () => void
+  learnFocusCipherType?: CipherType | null
+  learnFocusSignal?: number
 }) {
-  const insets = useSafeAreaInsets();
-  const pagerRef = useRef<PagerView | null>(null);
-  const [currentPage, setCurrentPage] = useState(0);
+  const insets = useSafeAreaInsets()
+  const pagerRef = useRef<PagerView | null>(null)
+  const [currentPage, setCurrentPage] = useState(0)
 
   const handlePageSelected = useCallback((e: any) => {
-    setCurrentPage(e.nativeEvent.position);
-  }, []);
+    setCurrentPage(e.nativeEvent.position)
+  }, [])
 
   const handleTabPress = useCallback((index: number) => {
-    setCurrentPage(index);
-    pagerRef.current?.setPage(index);
-  }, []);
+    setCurrentPage(index)
+    pagerRef.current?.setPage(index)
+  }, [])
+
+  useEffect(() => {
+    if (!requestedTab) return
+    const index = HOME_TABS.findIndex((tab) => tab.key === requestedTab)
+    if (index < 0) return
+    setCurrentPage(index)
+    pagerRef.current?.setPage(index)
+    onRequestedTabHandled?.()
+  }, [requestedTab, onRequestedTabHandled])
 
   return (
     <View style={styles.container}>
@@ -128,7 +140,12 @@ export function HomeTabs({
           <LeaderboardTab profile={profile} />
         </View>
         <View key="learn" style={styles.page}>
-          <LearnTab profile={profile} onEditProfile={onShowProfileModal} />
+          <LearnTab
+            profile={profile}
+            onEditProfile={onShowProfileModal}
+            focusCipherType={learnFocusCipherType}
+            focusSignal={learnFocusSignal}
+          />
         </View>
         <View key="profile" style={styles.page}>
           <ProfileTab profile={profile} onEditProfile={onShowProfileModal} />
@@ -144,7 +161,7 @@ export function HomeTabs({
         ]}
       >
         {HOME_TABS.map((tab, index) => {
-          const isActive = currentPage === index;
+          const isActive = currentPage === index
 
           return (
             <TouchableOpacity
@@ -166,50 +183,98 @@ export function HomeTabs({
                 </Text>
               )}
             </TouchableOpacity>
-          );
+          )
         })}
       </View>
     </View>
-  );
+  )
 }
 
 function MissionsTab({
   profile,
   onStartMission,
 }: {
-  profile: UserProfile;
-  onStartMission: () => void;
+  profile: UserProfile
+  onStartMission: () => void
 }) {
-  const currentLevelXp = (profile.xp || 0) - getXpForLevel(profile.level || 1);
+  const currentLevelXp = (profile.xp || 0) - getXpForLevel(profile.level || 1)
   const nextLevelXp =
-    getXpForLevel((profile.level || 1) + 1) - getXpForLevel(profile.level || 1);
+    getXpForLevel((profile.level || 1) + 1) - getXpForLevel(profile.level || 1)
   const progress = Math.max(
     0,
     Math.min(1, nextLevelXp === 0 ? 0 : currentLevelXp / nextLevelXp),
-  );
+  )
 
   return (
     <ScrollView
       style={styles.screenPad}
       contentContainerStyle={{ paddingBottom: 20 }}
     >
-      <Text style={styles.title}>CipherQuest</Text>
-      <Text style={styles.subtitle}>
-        Rank {profile.level} • {getRankName(profile.level)}
-      </Text>
-      <View style={styles.progressOuter}>
-        <View style={[styles.progressInner, { width: `${progress * 100}%` }]} />
-      </View>
-      <Text style={styles.muted}>
-        {currentLevelXp} / {nextLevelXp} XP
-      </Text>
+      <View style={styles.heroCard}>
+        <View style={styles.heroGlowOrb} />
+        <Text style={styles.heroKicker}>CipherQuest Command</Text>
+        <Text style={styles.title}>CipherQuest</Text>
+        <Text style={styles.systemLine}>Mission Net // Operational</Text>
 
-      <Pressable
-        style={[styles.button, styles.primaryButton]}
-        onPress={onStartMission}
-      >
-        <Text style={styles.primaryButtonText}>Start Mission</Text>
-      </Pressable>
+        <View style={styles.heroStatRow}>
+          <View style={styles.heroPill}>
+            <Text style={styles.heroPillLabel}>Rank</Text>
+            <Text style={styles.heroPillValue}>L{profile.level}</Text>
+          </View>
+          <View style={styles.heroPill}>
+            <Text style={styles.heroPillLabel}>Class</Text>
+            <Text style={styles.heroPillValue}>
+              {getRankName(profile.level)}
+            </Text>
+          </View>
+          <View style={styles.heroPill}>
+            <Text style={styles.heroPillLabel}>Uplink</Text>
+            <Text style={styles.heroPillValue}>Stable</Text>
+          </View>
+        </View>
+
+        <Text style={styles.progressLabel}>Level Progress</Text>
+        <View style={styles.progressOuter}>
+          <View
+            style={[styles.progressInner, { width: `${progress * 100}%` }]}
+          />
+        </View>
+        <Text style={styles.muted}>
+          {currentLevelXp} / {nextLevelXp} XP
+        </Text>
+
+        <Pressable
+          style={[styles.button, styles.primaryButton, styles.launchButton]}
+          onPress={onStartMission}
+        >
+          <Text style={styles.primaryButtonText}>Launch Mission</Text>
+        </Pressable>
+      </View>
+
+      <View style={styles.commandGrid}>
+        <View style={styles.commandCard}>
+          <Text style={styles.commandLabel}>Signal Archive</Text>
+          <Text style={styles.commandValue}>
+            {profile.missionProgress
+              ? Object.keys(profile.missionProgress).length
+              : 0}
+          </Text>
+          <Text style={styles.commandMeta}>Missions Completed</Text>
+        </View>
+        <View style={styles.commandCard}>
+          <Text style={styles.commandLabel}>Unlocked Zones</Text>
+          <Text style={styles.commandValue}>{profile.unlockedCount}</Text>
+          <Text style={styles.commandMeta}>Territories Available</Text>
+        </View>
+      </View>
+
+      <View style={styles.intelCard}>
+        <Text style={styles.intelTitle}>Current Operation Directive</Text>
+        <Text style={styles.body}>
+          Enemy traffic patterns suggest a shift-cipher relay window is opening.
+          Deploy now to secure intel and prevent escalation.
+        </Text>
+      </View>
 
       <Text style={[styles.subtitle, { marginTop: 20 }]}>Quick Stats</Text>
       <View style={styles.statsGrid}>
@@ -223,11 +288,11 @@ function MissionsTab({
         </View>
       </View>
     </ScrollView>
-  );
+  )
 }
 
 function ChallengesTab({ profile }: { profile: UserProfile }) {
-  const diffs: ("Easy" | "Medium" | "Hard")[] = ["Easy", "Medium", "Hard"];
+  const diffs: ("Easy" | "Medium" | "Hard")[] = ["Easy", "Medium", "Hard"]
 
   return (
     <ScrollView
@@ -240,8 +305,8 @@ function ChallengesTab({ profile }: { profile: UserProfile }) {
       </Text>
 
       {diffs.map((diff) => {
-        const daily = getDailyLevel(new Date(), diff);
-        const completed = !!profile.missionProgress?.[daily.id];
+        const daily = getDailyLevel(new Date(), diff)
+        const completed = !!profile.missionProgress?.[daily.id]
         return (
           <Pressable key={diff} style={styles.card} onPress={() => {}}>
             <Text style={styles.cardTitle}>
@@ -251,37 +316,37 @@ function ChallengesTab({ profile }: { profile: UserProfile }) {
               {daily.cipherType} • +{daily.xpReward} XP
             </Text>
           </Pressable>
-        );
+        )
       })}
     </ScrollView>
-  );
+  )
 }
 
 function LeaderboardTab({ profile }: { profile: UserProfile }) {
-  const [scores, setScores] = useState<Score[]>([]);
-  const [players, setPlayers] = useState<UserProfile[]>([]);
-  const [tab, setTab] = useState<"missions" | "players">("players");
-  const [selectedLevelId, setSelectedLevelId] = useState(LEVELS[0].id);
+  const [scores, setScores] = useState<Score[]>([])
+  const [players, setPlayers] = useState<UserProfile[]>([])
+  const [tab, setTab] = useState<"missions" | "players">("players")
+  const [selectedLevelId, setSelectedLevelId] = useState(LEVELS[0].id)
 
   useEffect(() => {
     const loadLocalLeaderboard = async () => {
       if (tab === "players") {
-        setPlayers([profile]);
-        setScores([]);
-        return;
+        setPlayers([profile])
+        setScores([])
+        return
       }
 
-      const rawScores = await AsyncStorage.getItem("localScores");
-      const parsed = rawScores ? (JSON.parse(rawScores) as Score[]) : [];
+      const rawScores = await AsyncStorage.getItem("localScores")
+      const parsed = rawScores ? (JSON.parse(rawScores) as Score[]) : []
       const missionScores = parsed
         .filter((s) => s.levelId === selectedLevelId)
-        .sort((a, b) => a.timeInSeconds - b.timeInSeconds);
-      setScores(missionScores);
-      setPlayers([]);
-    };
+        .sort((a, b) => a.timeInSeconds - b.timeInSeconds)
+      setScores(missionScores)
+      setPlayers([])
+    }
 
-    loadLocalLeaderboard();
-  }, [tab, selectedLevelId, profile]);
+    loadLocalLeaderboard()
+  }, [tab, selectedLevelId, profile])
 
   return (
     <View style={styles.screenPad}>
@@ -364,15 +429,15 @@ function LeaderboardTab({ profile }: { profile: UserProfile }) {
         />
       )}
     </View>
-  );
+  )
 }
 
 function ProfileTab({
   profile,
   onEditProfile,
 }: {
-  profile: UserProfile;
-  onEditProfile: () => void;
+  profile: UserProfile
+  onEditProfile: () => void
 }) {
   return (
     <ScrollView
@@ -424,80 +489,223 @@ function ProfileTab({
         </Pressable>
       )}
     </ScrollView>
-  );
+  )
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#0b1014" },
+  container: { flex: 1, backgroundColor: "#05090d" },
   pager: { flex: 1 },
   page: { flex: 1 },
   screenPad: { flex: 1, padding: 16 },
-  title: { color: "#e6edf3", fontSize: 28, fontWeight: "800", marginBottom: 8 },
-  subtitle: { color: "#7fb39f", fontSize: 14, marginBottom: 12 },
-  label: { color: "#8b98a5", fontSize: 12, marginBottom: 4 },
-  muted: { color: "#8b98a5", fontSize: 12, marginBottom: 8 },
-  body: { color: "#d0d7de", fontSize: 14, lineHeight: 20, marginBottom: 10 },
+  title: {
+    color: "#d8ffe9",
+    fontSize: 28,
+    fontWeight: "900",
+    marginBottom: 6,
+    textTransform: "uppercase",
+    letterSpacing: 0.8,
+  },
+  systemLine: {
+    color: "#78a5b3",
+    fontSize: 11,
+    marginBottom: 8,
+    textTransform: "uppercase",
+    letterSpacing: 1,
+  },
+  heroCard: {
+    position: "relative",
+    overflow: "hidden",
+    backgroundColor: "#08121a",
+    borderColor: "#2e5767",
+    borderWidth: 1,
+    borderRadius: 18,
+    padding: 14,
+    marginBottom: 14,
+    shadowColor: "#63f8bb",
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.22,
+    shadowRadius: 10,
+  },
+  heroGlowOrb: {
+    position: "absolute",
+    width: 180,
+    height: 180,
+    borderRadius: 999,
+    backgroundColor: "rgba(70,242,173,0.14)",
+    right: -40,
+    top: -65,
+  },
+  heroKicker: {
+    color: "#89aeba",
+    fontSize: 10,
+    textTransform: "uppercase",
+    letterSpacing: 1.1,
+    marginBottom: 6,
+    fontWeight: "700",
+  },
+  heroStatRow: {
+    flexDirection: "row",
+    gap: 8,
+    marginBottom: 12,
+  },
+  heroPill: {
+    flex: 1,
+    backgroundColor: "#0f1d27",
+    borderColor: "#315364",
+    borderWidth: 1,
+    borderRadius: 12,
+    paddingVertical: 8,
+    paddingHorizontal: 8,
+  },
+  heroPillLabel: {
+    color: "#7f9da8",
+    fontSize: 10,
+    textTransform: "uppercase",
+    letterSpacing: 0.9,
+    marginBottom: 2,
+  },
+  heroPillValue: {
+    color: "#d9ffee",
+    fontSize: 13,
+    fontWeight: "800",
+  },
+  progressLabel: {
+    color: "#89aeba",
+    fontSize: 10,
+    textTransform: "uppercase",
+    letterSpacing: 1,
+    marginBottom: 5,
+  },
+  launchButton: {
+    marginTop: 6,
+  },
+  commandGrid: {
+    flexDirection: "row",
+    gap: 10,
+    marginBottom: 10,
+  },
+  commandCard: {
+    flex: 1,
+    backgroundColor: "#0b161e",
+    borderColor: "#2a4958",
+    borderWidth: 1,
+    borderRadius: 14,
+    padding: 11,
+  },
+  commandLabel: {
+    color: "#83a8b5",
+    fontSize: 10,
+    textTransform: "uppercase",
+    letterSpacing: 0.9,
+    marginBottom: 4,
+  },
+  commandValue: {
+    color: "#6affbc",
+    fontSize: 23,
+    fontWeight: "900",
+    marginBottom: 2,
+  },
+  commandMeta: {
+    color: "#7395a1",
+    fontSize: 11,
+  },
+  intelCard: {
+    backgroundColor: "#09141c",
+    borderColor: "#2a4d5d",
+    borderWidth: 1,
+    borderRadius: 14,
+    padding: 12,
+    marginTop: 2,
+  },
+  intelTitle: {
+    color: "#a8efce",
+    fontSize: 12,
+    fontWeight: "800",
+    textTransform: "uppercase",
+    letterSpacing: 0.8,
+    marginBottom: 6,
+  },
+  subtitle: { color: "#72d8ad", fontSize: 14, marginBottom: 12 },
+  label: {
+    color: "#84a8b1",
+    fontSize: 11,
+    marginBottom: 4,
+    textTransform: "uppercase",
+    letterSpacing: 0.8,
+  },
+  muted: { color: "#84a8b1", fontSize: 12, marginBottom: 8 },
+  body: { color: "#bfd5de", fontSize: 14, lineHeight: 20, marginBottom: 10 },
   progressOuter: {
     height: 8,
-    backgroundColor: "#1b2630",
+    backgroundColor: "#111a22",
     borderRadius: 999,
     overflow: "hidden",
     marginBottom: 8,
   },
-  progressInner: { height: 8, backgroundColor: "#14b86c" },
+  progressInner: { height: 8, backgroundColor: "#4df4aa" },
   button: {
-    backgroundColor: "#1a242d",
-    borderColor: "#2c3c4a",
+    backgroundColor: "#0f171f",
+    borderColor: "#284756",
     borderWidth: 1,
     paddingVertical: 12,
     paddingHorizontal: 14,
-    borderRadius: 10,
+    borderRadius: 12,
     marginTop: 10,
     alignItems: "center",
   },
-  primaryButton: { backgroundColor: "#14b86c", borderColor: "#14b86c" },
-  buttonText: { color: "#d0d7de", fontWeight: "600" },
-  primaryButtonText: { color: "#03190f", fontWeight: "700" },
+  primaryButton: { backgroundColor: "#42d995", borderColor: "#8bfec8" },
+  buttonText: { color: "#d3e8ee", fontWeight: "700" },
+  primaryButtonText: {
+    color: "#042012",
+    fontWeight: "900",
+    letterSpacing: 0.4,
+    textTransform: "uppercase",
+  },
   row: { flexDirection: "row", gap: 8, marginBottom: 10 },
   smallButton: {
-    backgroundColor: "#1a242d",
-    borderColor: "#2c3c4a",
+    backgroundColor: "#0f171f",
+    borderColor: "#274758",
     borderWidth: 1,
-    borderRadius: 10,
+    borderRadius: 12,
     paddingVertical: 8,
     paddingHorizontal: 12,
   },
-  smallButtonActive: { backgroundColor: "#14b86c", borderColor: "#14b86c" },
-  smallButtonText: { color: "#d0d7de", fontSize: 12, fontWeight: "600" },
+  smallButtonActive: { backgroundColor: "#42d995", borderColor: "#8bfec8" },
+  smallButtonText: {
+    color: "#d3e8ee",
+    fontSize: 12,
+    fontWeight: "700",
+    letterSpacing: 0.4,
+  },
   card: {
-    backgroundColor: "#111820",
-    borderColor: "#2a3542",
+    backgroundColor: "#0c151d",
+    borderColor: "#223a46",
     borderWidth: 1,
     padding: 12,
-    borderRadius: 12,
+    borderRadius: 14,
     marginBottom: 10,
   },
   cardTitle: {
-    color: "#e6edf3",
+    color: "#d8ffe9",
     fontWeight: "700",
     fontSize: 15,
     marginBottom: 4,
   },
   levelChip: {
-    backgroundColor: "#1a242d",
-    borderColor: "#2c3c4a",
+    backgroundColor: "#0f171f",
+    borderColor: "#274758",
     borderWidth: 1,
     borderRadius: 999,
     paddingVertical: 6,
     paddingHorizontal: 10,
     marginRight: 8,
   },
-  levelChipActive: { backgroundColor: "#14b86c", borderColor: "#14b86c" },
+  levelChipActive: { backgroundColor: "#42d995", borderColor: "#8bfec8" },
   tabBar: {
     flexDirection: "row",
-    backgroundColor: "#111820",
+    backgroundColor: "#070f14",
     borderTopWidth: 1,
-    borderTopColor: "#2a3542",
+    borderTopColor: "#1e3744",
     paddingBottom: 12,
     paddingTop: 8,
     height: 72,
@@ -511,11 +719,11 @@ const styles = StyleSheet.create({
   },
   tabLabel: {
     fontSize: 13,
-    fontWeight: "600",
-    color: "#8b98a5",
+    fontWeight: "700",
+    color: "#6d8b95",
   },
   tabLabelActive: {
-    color: "#14b86c",
+    color: "#6affbc",
   },
   statsGrid: {
     flexDirection: "row",
@@ -524,36 +732,36 @@ const styles = StyleSheet.create({
   },
   statCard: {
     flex: 1,
-    backgroundColor: "#111820",
-    borderColor: "#2a3542",
+    backgroundColor: "#0c151d",
+    borderColor: "#223a46",
     borderWidth: 1,
-    borderRadius: 10,
+    borderRadius: 12,
     padding: 12,
     alignItems: "center",
     justifyContent: "center",
   },
   statValue: {
-    color: "#14b86c",
+    color: "#6affbc",
     fontSize: 20,
     fontWeight: "800",
     marginBottom: 4,
   },
   statLabel: {
-    color: "#8b98a5",
+    color: "#6d8b95",
     fontSize: 11,
     fontWeight: "600",
   },
   profileSection: {
-    backgroundColor: "#111820",
-    borderColor: "#2a3542",
+    backgroundColor: "#0c151d",
+    borderColor: "#223a46",
     borderWidth: 1,
-    borderRadius: 10,
+    borderRadius: 12,
     padding: 12,
     marginBottom: 12,
   },
   profileValue: {
-    color: "#e6edf3",
+    color: "#d8ffe9",
     fontSize: 14,
     fontWeight: "600",
   },
-});
+})

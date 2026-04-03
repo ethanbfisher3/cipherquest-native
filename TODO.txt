@@ -5,11 +5,25 @@ Redesign the world map page to always have something covering the bottom half, m
 Video Ads every few levels and/or banner ads during the level
 Tutorial
 Have resources that make it easier for the user to complete each cipher, maybe a notes section or something
+Have levels partially completed to make them easier for the user
+Make caesar cipher mechanism scrollable by the user
+Make the monoalphabetic mechanism just a bunch of buttons for the user to map the letters one to another
+In addition to ranks, have ranks for each cipher (master of enigma cipher, for example)
+On the learn page, add tips for decipher and tutorials (a 'practice this cipher' sort of page)
+Let users challenge others and create enciphered messages
+
 
 Map:
 Make the map look better
 Make the world map a gif or something so it's more interesting
 When the user clicks on a country, light up its borders or something
+
+
+Server:
+    Stores:
+        Player level, experience, ranks, other profile information => Leaderboard information
+        Daily challenge wins
+        Daily challenge information itself
 
 
 Maybe:

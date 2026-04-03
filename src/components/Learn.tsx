@@ -1,30 +1,41 @@
-import React, { useState } from "react";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
-import { CIPHER_INFOS } from "../constants";
-import { UserProfile } from "../types";
-import { appStyles as styles } from "./appStyles";
+import React, { useEffect, useState } from "react"
+import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native"
+import { Ionicons } from "@expo/vector-icons"
+import { CIPHER_INFOS } from "../constants"
+import { CipherType, UserProfile } from "../types"
+import { appStyles as styles } from "./appStyles"
 
 export function LearnTab({
   profile,
   onEditProfile,
+  focusCipherType,
+  focusSignal,
 }: {
-  profile: UserProfile;
-  onEditProfile: () => void;
+  profile: UserProfile
+  onEditProfile: () => void
+  focusCipherType?: CipherType | null
+  focusSignal?: number
 }) {
-  const [expandedCiphers, setExpandedCiphers] = useState<Set<string>>(
-    new Set(),
-  );
+  const [expandedCiphers, setExpandedCiphers] = useState<Set<string>>(new Set())
 
   const toggleExpand = (cipherType: string) => {
-    const updated = new Set(expandedCiphers);
+    const updated = new Set(expandedCiphers)
     if (updated.has(cipherType)) {
-      updated.delete(cipherType);
+      updated.delete(cipherType)
     } else {
-      updated.add(cipherType);
+      updated.add(cipherType)
     }
-    setExpandedCiphers(updated);
-  };
+    setExpandedCiphers(updated)
+  }
+
+  useEffect(() => {
+    if (!focusCipherType) return
+    setExpandedCiphers((prev) => {
+      const next = new Set(prev)
+      next.add(focusCipherType)
+      return next
+    })
+  }, [focusCipherType, focusSignal])
 
   return (
     <ScrollView
@@ -71,9 +82,16 @@ export function LearnTab({
       </Text>
 
       {CIPHER_INFOS.map((cipher) => {
-        const isExpanded = expandedCiphers.has(cipher.type);
+        const isExpanded = expandedCiphers.has(cipher.type)
+        const isFocused = cipher.type === focusCipherType
         return (
-          <View key={cipher.type} style={localStyles.cipherCard}>
+          <View
+            key={cipher.type}
+            style={[
+              localStyles.cipherCard,
+              isFocused && localStyles.focusedCipherCard,
+            ]}
+          >
             <Pressable
               style={localStyles.headerButton}
               onPress={() => toggleExpand(cipher.type)}
@@ -84,6 +102,13 @@ export function LearnTab({
                 {/* <Text style={styles.muted}>{cipher.type.toUpperCase()}</Text> */}
               </View>
               <View style={localStyles.headerRight}>
+                {isFocused && (
+                  <View style={localStyles.focusedPill}>
+                    <Text style={localStyles.focusedPillText}>
+                      Current Level
+                    </Text>
+                  </View>
+                )}
                 <View
                   style={[
                     localStyles.difficultyPill,
@@ -115,10 +140,10 @@ export function LearnTab({
               </View>
             )}
           </View>
-        );
+        )
       })}
     </ScrollView>
-  );
+  )
 }
 
 const localStyles = StyleSheet.create({
@@ -163,6 +188,14 @@ const localStyles = StyleSheet.create({
     overflow: "hidden",
     marginBottom: 12,
   },
+  focusedCipherCard: {
+    borderColor: "#6affbc",
+    borderWidth: 2,
+    shadowColor: "#6affbc",
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.28,
+    shadowRadius: 8,
+  },
   headerButton: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -174,6 +207,21 @@ const localStyles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
+  },
+  focusedPill: {
+    borderRadius: 999,
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    borderWidth: 1,
+    borderColor: "#6affbc",
+    backgroundColor: "rgba(106,255,188,0.16)",
+  },
+  focusedPillText: {
+    color: "#d8ffe9",
+    fontSize: 10,
+    fontWeight: "800",
+    textTransform: "uppercase",
+    letterSpacing: 0.4,
   },
   expandIcon: {
     marginLeft: 4,
@@ -224,4 +272,4 @@ const localStyles = StyleSheet.create({
     fontSize: 13,
     lineHeight: 19,
   },
-});
+})
